@@ -1,5 +1,12 @@
 # Rust-WASM experiments 🦀 🕸
 
+## 🥪 Instructions
+
+1. Compile to WASM and create a NPM package with `wasm-pack build --target bundler`.
+2. Go to `/site`.
+3. Link the folder `/pkg` to `hello-wasm` package with [npm-link](<https://docs.npmjs.com/cli/v8/commands/npm-link>).
+4. Install with `npm i` and run webpack server with `npm run dev`.
+
 ## 🗓 change log
 
 ### Sun 21 Aug 2022
@@ -18,17 +25,18 @@ Follow MDN tutorial, [Rust-WASM](https://developer.mozilla.org/en-US/docs/WebAss
 
 This was similar to <https://rustwasm.github.io/docs/wasm-bindgen/examples/hello-world.html> although that seems to be a bit out of date, check the comment on webpack imports
 
-Instructions:
-
-1. Compile to WASM (actually, NPM) with `wasm-pack build --target bundler`.
-2. Go to `/site`.
-3. Then link the folder `/pkg` to `hello-wasm` package with [npm-link](<https://docs.npmjs.com/cli/v8/commands/npm-link>).
-4. Install with `npm i` and run webpack server with `npm run serve`.
-
 Next:
 
 - Configure TypeScript in the sample project, and check imports and definitions.
 - Try something more ambitious, eg. a small frontend showing performance of native JS vs Rust-WASM on some CPU intensive workload.
+
+### Mon 22 Aug 2022
+
+- Updated to webpack 5
+- Transpiled using SWC 🦀
+- Added TypeScript
+- Used top level await and wasm async experimental features
+- A very rude performance test
 
 ## To do list
 
