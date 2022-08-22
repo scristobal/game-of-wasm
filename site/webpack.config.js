@@ -14,7 +14,7 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.m?js$/,
+                test: /\.ts$/,
                 exclude: /(node_modules)/,
                 use: {
                     loader: 'swc-loader',
