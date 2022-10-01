@@ -6,7 +6,8 @@
         "hello-wasm": "^0.1.0"
     },
     "devDependencies": {
-        "@swc/core": "^1.2.241",
+        "@swc/cli": "^0.1.57",
+        "@swc/core": "^1.3.4",
         "@tsconfig/recommended": "^1.0.1",
         "swc-loader": "^0.2.3",
         "webpack": "^5.74.0",

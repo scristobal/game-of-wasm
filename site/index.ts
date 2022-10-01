@@ -1,46 +1,15 @@
-const js = await import('hello-wasm');
+const { Universe } = await import('hello-wasm');
 
-// js.greet('WebAssembly with npm');
+const pre = document.getElementById('game-of-life-canvas')!;
+const universe = Universe.new();
 
-const fib = function (n: number): number {
-    let res = 1;
-    let prev = 0;
+const renderLoop = () => {
+    pre.textContent = universe.render();
+    universe.tick();
 
-    for (let i = 0; i < n; i++) {
-        const next = prev + res;
-        prev = res;
-        res = next;
-    }
-
-    return res;
+    requestAnimationFrame(renderLoop);
 };
 
-const N = 100_000_000;
-
-// test WASM performance
-{
-    const start = performance.now();
-
-    const a = js.fib(N);
-
-    const end = performance.now();
-
-    const timeTaken = end - start;
-
-    console.log('time WASM', timeTaken);
-}
-
-// test JS performance
-{
-    const start = performance.now();
-
-    const b = fib(N);
-
-    const end = performance.now();
-
-    const timeTaken = end - start;
-
-    console.log('time JS', timeTaken);
-}
+requestAnimationFrame(renderLoop);
 
 export {};
