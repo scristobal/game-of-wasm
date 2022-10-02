@@ -50,6 +50,11 @@ Next:
 Done today:
 
 - Adapted example from [rust-wasm book](https://rustwasm.github.io/docs/book/game-of-life/introduction.html) to use TypeScript and SWC on Webpack.
+- Followed until <https://rustwasm.github.io/docs/book/game-of-life/implementing.html#rendering-to-canvas-directly-from-memory>
+
+Next:
+
+- Continue book example
 
 ## To do list
 
