@@ -1,5 +1,5 @@
-const { Universe, Cell } = await import('hello-wasm');
-const { memory } = await import('hello-wasm/hello_wasm_bg.wasm');
+const { Universe, Cell } = await import('glife-wasm');
+const { memory } = await import('glife-wasm/glife_wasm_bg.wasm');
 
 const CELL_SIZE = 5; // px
 const GRID_COLOR = '#CCCCCC';

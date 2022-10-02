@@ -1,10 +1,10 @@
 {
     "scripts": {
         "dev": "webpack serve",
-        "build": "webpack --mode production"
+        "build": "rm -rf dist && webpack --mode production"
     },
     "dependencies": {
-        "hello-wasm": "^0.1.0"
+        "glife-wasm": "^0.1.1"
     },
     "devDependencies": {
         "@swc/cli": "^0.1.57",
