@@ -1,4 +1,6 @@
 const path = require('path');
+const CopyPlugin = require('copy-webpack-plugin');
+
 module.exports = {
     entry: './index.ts',
     output: {
@@ -29,4 +31,9 @@ module.exports = {
 
         port: 3000,
     },
+    plugins: [
+        new CopyPlugin({
+            patterns: ['./index.html'],
+        }),
+    ],
 };

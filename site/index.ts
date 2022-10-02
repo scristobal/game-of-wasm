@@ -22,7 +22,7 @@ const ctx = canvas.getContext('2d')!;
 const renderLoop = () => {
     universe.tick();
 
-    drawGrid(ctx);
+    // drawGrid(ctx);
     drawCells(ctx);
 
     requestAnimationFrame(renderLoop);
@@ -70,7 +70,7 @@ const drawCells = (ctx: CanvasRenderingContext2D) => {
     ctx.stroke();
 };
 
-drawGrid(ctx);
+// drawGrid(ctx);
 drawCells(ctx);
 
 requestAnimationFrame(renderLoop);
