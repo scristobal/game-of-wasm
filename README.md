@@ -61,6 +61,7 @@ Next:
 - Deployed to Vercel <https://samuelsh-glife-wasm.vercel.app/>
 - Improved NPM scripts for development and build
 - Bug hunting re. `wasm-pack build`  <https://github.com/rustwasm/wasm-pack/issues/990>
+- Exercises section 4.4 rust-wasm book
 
 ## To do list
 

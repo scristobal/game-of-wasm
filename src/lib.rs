@@ -1,6 +1,9 @@
 #![allow(unused_variables)]
 #![allow(dead_code)]
 
+extern crate console_error_panic_hook;
+
+use rand;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -42,12 +45,14 @@ impl Universe {
     }
 
     pub fn new() -> Universe {
+        console_error_panic_hook::set_once();
+
         let width = 128;
         let height = 128;
 
         let cells = (0..width * height)
             .map(|i| {
-                if i % 2 == 0 || i % 7 == 0 {
+                if rand::random::<f64>() > 0.5 {
                     Cell::Alive
                 } else {
                     Cell::Dead

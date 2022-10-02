@@ -70,7 +70,7 @@ const drawCells = (ctx: CanvasRenderingContext2D) => {
     ctx.stroke();
 };
 
-// drawGrid(ctx);
+//drawGrid(ctx);
 drawCells(ctx);
 
 requestAnimationFrame(renderLoop);
