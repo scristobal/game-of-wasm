@@ -2,12 +2,11 @@
 
 ## 🥪 Instructions
 
-1. Compile to WASM and create a NPM package with `wasm-pack build --target bundler`.
-2. Go to `/site`.
-3. Link the folder `/pkg` to `hello-wasm` package with [npm-link](<https://docs.npmjs.com/cli/v8/commands/npm-link>).
-    1. go to `pkg/` and execute `npm link`
-    2. go to site and run `npm link hello-wasm`
-4. Install with `npm i` and run webpack server with `npm run dev`.
+1. Compile to WASM and create a NPM package with `wasm-pack build --target bundler` or use `Makefile`, eg `make wasm`. Output will be in the `pkg/` folder
+2. Go to `/site` install deps with `npm i` and run a dev server with `npm run dev`. This will create a `npm link` under the hood to `../pkg`
+3. To build the web app, run `npm run build`. This will remove the `npm link`, install modules and build the app.
+
+Note: At the time of the writing, if you plan to release the wasm module, you need to add `glife_wasm_bg.wasm.d.ts` to the `files` array in `pkg/package.json`. Related to <https://github.com/rustwasm/wasm-pack/issues/990> but not exactly, files are included but not definitions.
 
 ## 🗓 change log
 
@@ -55,6 +54,13 @@ Done today:
 Next:
 
 - Continue book example
+
+### Sun 2 Oct 2022
+
+- Published to NPM <https://www.npmjs.com/package/glife-wasm>
+- Deployed to Vercel <https://samuelsh-glife-wasm.vercel.app/>
+- Improved NPM scripts for development and build
+- Bug hunting re. `wasm-pack build`  <https://github.com/rustwasm/wasm-pack/issues/990>
 
 ## To do list
 

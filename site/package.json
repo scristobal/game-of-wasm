@@ -1,10 +1,10 @@
 {
     "scripts": {
-        "dev": "webpack serve",
-        "build": "rm -rf dist && webpack --mode production"
+        "dev": "npm link ../pkg && webpack serve",
+        "build": "npm unlink --no-save glife-wasm && npm ci && rm -rf dist && webpack --mode production"
     },
     "dependencies": {
-        "glife-wasm": "^0.1.1"
+        "glife-wasm": "^0.1.2"
     },
     "devDependencies": {
         "@swc/cli": "^0.1.57",
