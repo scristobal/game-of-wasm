@@ -2,7 +2,6 @@ const { Universe, Cell } = await import('glife-wasm');
 const { memory } = await import('glife-wasm/glife_wasm_bg.wasm');
 
 const CELL_SIZE = 5; // px
-const GRID_COLOR = '#CCCCCC';
 const DEAD_COLOR = '#FFFFFF';
 const ALIVE_COLOR = '#000000';
 
@@ -10,14 +9,35 @@ const universe = Universe.new();
 const width = universe.width();
 const height = universe.height();
 
-// Give the canvas room for all of our cells and a 1px border
-// around each of them.
 const canvas = document.getElementById('game-of-life-canvas') as HTMLCanvasElement;
+
+const ctx = canvas.getContext('2d')!;
+
+canvas.addEventListener('click', (event) => {
+    const boundingRect = canvas.getBoundingClientRect();
+
+    const scaleX = canvas.width / boundingRect.width;
+    const scaleY = canvas.height / boundingRect.height;
+
+    const canvasLeft = (event.clientX - boundingRect.left) * scaleX;
+    const canvasTop = (event.clientY - boundingRect.top) * scaleY;
+
+    const row = Math.min(Math.floor(canvasTop / (CELL_SIZE + 1)), height - 1);
+    const col = Math.min(Math.floor(canvasLeft / (CELL_SIZE + 1)), width - 1);
+
+    universe.toggle_cell(row, col);
+
+    drawCells(ctx);
+});
 
 canvas.height = (CELL_SIZE + 1) * height + 1;
 canvas.width = (CELL_SIZE + 1) * width + 1;
 
-const ctx = canvas.getContext('2d')!;
+let animationId: number | undefined = undefined;
+
+const isPaused = () => {
+    return animationId === undefined;
+};
 
 const renderLoop = () => {
     universe.tick();
@@ -25,26 +45,7 @@ const renderLoop = () => {
     // drawGrid(ctx);
     drawCells(ctx);
 
-    requestAnimationFrame(renderLoop);
-};
-
-const drawGrid = (ctx: CanvasRenderingContext2D) => {
-    ctx.beginPath();
-    ctx.strokeStyle = GRID_COLOR;
-
-    // Vertical lines.
-    for (let i = 0; i <= width; i++) {
-        ctx.moveTo(i * (CELL_SIZE + 1) + 1, 0);
-        ctx.lineTo(i * (CELL_SIZE + 1) + 1, (CELL_SIZE + 1) * height + 1);
-    }
-
-    // Horizontal lines.
-    for (let j = 0; j <= height; j++) {
-        ctx.moveTo(0, j * (CELL_SIZE + 1) + 1);
-        ctx.lineTo((CELL_SIZE + 1) * width + 1, j * (CELL_SIZE + 1) + 1);
-    }
-
-    ctx.stroke();
+    animationId = requestAnimationFrame(renderLoop);
 };
 
 const getIndex = (row: number, column: number) => {
@@ -73,6 +74,29 @@ const drawCells = (ctx: CanvasRenderingContext2D) => {
 //drawGrid(ctx);
 drawCells(ctx);
 
-requestAnimationFrame(renderLoop);
+const play = () => {
+    renderLoop();
+};
+
+const pause = () => {
+    animationId && cancelAnimationFrame(animationId);
+    animationId = undefined;
+};
+
+const msg = document.getElementById('message');
+
+document.addEventListener('keyup', (event) => {
+    if (event.key === ' ') {
+        if (isPaused()) {
+            play();
+            msg && (msg.textContent = 'Press space to pause');
+        } else {
+            pause();
+            msg && (msg.textContent = 'Game paused. You can add/remove points by clicking. Press space to resume');
+        }
+    }
+});
+
+play();
 
 export {};

@@ -63,6 +63,16 @@ Next:
 - Bug hunting re. `wasm-pack build`  <https://github.com/rustwasm/wasm-pack/issues/990>
 - Exercises section 4.4 rust-wasm book
 
+### Sun 9 Oct 202
+
+- Added interactivity
+- Styled with PicoCSS
+
+Next:
+
+- Try to write directly into memory.
+- Modify grid on mouse button down.
+
 ## To do list
 
 - [x] [MDN's Rust-WASM intro](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm).
