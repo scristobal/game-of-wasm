@@ -63,7 +63,7 @@ Next:
 - Bug hunting re. `wasm-pack build`  <https://github.com/rustwasm/wasm-pack/issues/990>
 - Exercises section 4.4 rust-wasm book
 
-### Sun 9 Oct 202
+### Sun 9 Oct 2022
 
 - Added interactivity
 - Styled with PicoCSS
@@ -71,7 +71,14 @@ Next:
 Next:
 
 - Try to write directly into memory.
-- Modify grid on mouse button down.
+
+### Tue 11 Oct 2022
+
+- Cells are modified directly in memory on mouse over.
+
+Next:
+
+- Continue rust-wasm book
 
 ## To do list
 

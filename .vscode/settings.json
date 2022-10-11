@@ -1,5 +1,5 @@
 {
-    "cSpell.words": ["bindgen", "glife", "repr"],
+    "cSpell.words": ["bindgen", "glife", "neighbours", "Pico", "repr", "underpopulation", "WASI"],
     "workbench.colorCustomizations": {
         "activityBar.activeBackground": "#e65212",
         "activityBar.background": "#e65212",
