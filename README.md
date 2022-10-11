@@ -1,12 +1,23 @@
 # Rust-WASM experiments 🦀 🕸
 
-## 🥪 Instructions
+## Instructions
+
+### 🍳 Run locally
 
 1. Compile to WASM and create a NPM package with `wasm-pack build --target bundler` or use `Makefile`, eg `make wasm`. Output will be in the `pkg/` folder
 2. Go to `/site` install deps with `npm i` and run a dev server with `npm run dev`. This will create a `npm link` under the hood to `../pkg`
-3. To build the web app, run `npm run build`. This will remove the `npm link`, install modules and build the app.
 
-Note: At the time of the writing, if you plan to release the wasm module, you need to add `glife_wasm_bg.wasm.d.ts` to the `files` array in `pkg/package.json`. Related to <https://github.com/rustwasm/wasm-pack/issues/990> but not exactly, files are included but not definitions.
+### 📦 Publish
+
+0. Update version number on `Cargo.toml`
+
+1. Compile to WASM and create a NPM package with `wasm-pack build --target bundler` or use `Makefile`, eg `make wasm`. Output will be in the `pkg/` folder
+
+2. Execute `npm run build`. This will remove any existing `npm link`, install modules and build the app.
+
+3. Add `glife_wasm_bg.wasm.d.ts` to the `files` array in `pkg/package.json`. Related to <https://github.com/rustwasm/wasm-pack/issues/990> but not exactly, files are included but not definitions.
+
+4. Finally, change the value of `"name"` inside `pkg/package.json` to "glife-wasm".
 
 ## 🗓 change log
 
@@ -75,6 +86,8 @@ Next:
 ### Tue 11 Oct 2022
 
 - Cells are modified directly in memory on mouse over.
+- Removed pause interaction
+- Headless tests w/ `wasm_bindgen_test`
 
 Next:
 
