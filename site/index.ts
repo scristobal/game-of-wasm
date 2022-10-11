@@ -36,19 +36,12 @@ canvas.addEventListener('mousemove', (event) => {
 canvas.height = (CELL_SIZE + 1) * height + 1;
 canvas.width = (CELL_SIZE + 1) * width + 1;
 
-let animationId: number | undefined = undefined;
-
-const isPaused = () => {
-    return animationId === undefined;
-};
-
 const renderLoop = () => {
     universe.tick();
 
     // drawGrid(ctx);
     drawCells(ctx);
-
-    animationId = requestAnimationFrame(renderLoop);
+    requestAnimationFrame(renderLoop);
 };
 
 const getIndex = (row: number, column: number) => {
@@ -74,32 +67,7 @@ const drawCells = (ctx: CanvasRenderingContext2D) => {
     ctx.stroke();
 };
 
-//drawGrid(ctx);
 drawCells(ctx);
-
-const play = () => {
-    renderLoop();
-};
-
-const pause = () => {
-    animationId && cancelAnimationFrame(animationId);
-    animationId = undefined;
-};
-
-const msg = document.getElementById('message');
-
-document.addEventListener('keyup', (event) => {
-    if (event.key === ' ') {
-        if (isPaused()) {
-            play();
-            msg && (msg.textContent = 'Press space to pause');
-        } else {
-            pause();
-            msg && (msg.textContent = 'Game paused. You can add/remove points by clicking. Press space to resume');
-        }
-    }
-});
-
-play();
+renderLoop();
 
 export {};
