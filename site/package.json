@@ -4,7 +4,7 @@
         "build": "npm unlink --no-save glife-wasm && npm ci && rm -rf dist && webpack --mode production"
     },
     "dependencies": {
-        "glife-wasm": "^0.3.0"
+        "glife-wasm": "^0.4.0"
     },
     "devDependencies": {
         "@swc/cli": "^0.1.57",

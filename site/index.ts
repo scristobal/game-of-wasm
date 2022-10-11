@@ -13,7 +13,7 @@ const canvas = document.getElementById('game-of-life-canvas') as HTMLCanvasEleme
 
 const ctx = canvas.getContext('2d')!;
 
-canvas.addEventListener('click', (event) => {
+canvas.addEventListener('mousemove', (event) => {
     const boundingRect = canvas.getBoundingClientRect();
 
     const scaleX = canvas.width / boundingRect.width;
@@ -25,7 +25,10 @@ canvas.addEventListener('click', (event) => {
     const row = Math.min(Math.floor(canvasTop / (CELL_SIZE + 1)), height - 1);
     const col = Math.min(Math.floor(canvasLeft / (CELL_SIZE + 1)), width - 1);
 
-    universe.toggle_cell(row, col);
+    const cellsPtr = universe.cells();
+    const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
+
+    cells[getIndex(row, col)] = cells[getIndex(row, col)] === Cell.Dead ? Cell.Alive : Cell.Dead;
 
     drawCells(ctx);
 });
