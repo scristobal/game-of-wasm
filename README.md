@@ -17,8 +17,6 @@
 
 3. Add `glife_wasm_bg.wasm.d.ts` to the `files` array in `pkg/package.json`. Related to <https://github.com/rustwasm/wasm-pack/issues/990> but not exactly, files are included but not definitions.
 
-4. Finally, change the value of `"name"` inside `pkg/package.json` to "glife-wasm".
-
 ## 🗓 change log
 
 ### Sun 21 Aug 2022
@@ -92,6 +90,11 @@ Next:
 Next:
 
 - Continue rust-wasm book
+
+### Wed 12 Oct 2022
+
+- Bump rand dep, fixed feature errors
+- Fixed `extern crate` error on `tests/`
 
 ## To do list
 
