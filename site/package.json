@@ -1,6 +1,6 @@
 {
     "scripts": {
-        "dev": "npm link ../pkg && webpack serve",
+        "dev": "npm link ../pkg && npm i && webpack serve",
         "build": "npm unlink --no-save glife-wasm && npm ci && rm -rf dist && webpack --mode production"
     },
     "dependencies": {

@@ -95,11 +95,13 @@ Next:
 
 - Bump rand dep, fixed feature errors
 - Fixed `extern crate` error on `tests/`
+- Profiling and optimizations
 
 ## To do list
 
 - [x] [MDN's Rust-WASM intro](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm).
 - [ ] A slightly more involved example with the [Rust-wasm book 📖](https://rustwasm.github.io/docs/book/)
+- [ ] Remaining exercises [time-optimization](<https://rustwasm.github.io/docs/book/game-of-life/time-profiling.html#exercises>) and [size-optimization](https://rustwasm.github.io/docs/book/game-of-life/code-size.html#exercises)
 - [ ] Check out the [`js!` macro](https://docs.rs/stdweb/0.4.0/stdweb/macro.js.html)
 - [ ] [wasm-bindgen](https://rustwasm.github.io/docs/wasm-bindgen/)
 - [ ] [wasm-pack](https://rustwasm.github.io/docs/wasm-pack/)
