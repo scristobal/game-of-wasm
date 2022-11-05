@@ -19,8 +19,8 @@ pub enum Cell {
 impl Cell {
     fn toggle(&mut self) {
         *self = match *self {
-            Cell::Dead => Cell::Alive,
-            Cell::Alive => Cell::Dead,
+            Self::Dead => Self::Alive,
+            Self::Alive => Self::Dead,
         };
     }
 }
@@ -89,7 +89,7 @@ impl Universe {
         self.cells[idx].toggle();
     }
 
-    pub fn new() -> Universe {
+    pub fn new() -> Self {
         console_error_panic_hook::set_once();
 
         let width = 128;
@@ -107,7 +107,7 @@ impl Universe {
             })
             .collect();
 
-        Universe {
+        Self {
             width,
             height,
             cells,
