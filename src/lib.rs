@@ -34,33 +34,22 @@ pub struct Universe {
 
 #[wasm_bindgen]
 impl Universe {
-    fn get_index(&self, row: u32, column: u32) -> usize {
-        (row * self.width + column) as usize
+    fn get_index(&self, row: u32, col: u32) -> usize {
+        (row * self.width + col) as usize
     }
 
-    fn live_neighbor_count(&self, row: u32, column: u32) -> u8 {
+    fn live_neighbor_count(&self, row: u32, col: u32) -> u8 {
         let mut count = 0;
 
         let north = if row == 0 { self.height - 1 } else { row - 1 };
-
         let south = if row == self.height - 1 { 0 } else { row + 1 };
-
-        let west = if column == 0 {
-            self.width - 1
-        } else {
-            column - 1
-        };
-
-        let east = if column == self.width - 1 {
-            0
-        } else {
-            column + 1
-        };
+        let west = if col == 0 { self.width - 1 } else { col - 1 };
+        let east = if col == self.width - 1 { 0 } else { col + 1 };
 
         let nw = self.get_index(north, west);
         count += self.cells[nw] as u8;
 
-        let n = self.get_index(north, column);
+        let n = self.get_index(north, col);
         count += self.cells[n] as u8;
 
         let ne = self.get_index(north, east);
@@ -75,7 +64,7 @@ impl Universe {
         let sw = self.get_index(south, west);
         count += self.cells[sw] as u8;
 
-        let s = self.get_index(south, column);
+        let s = self.get_index(south, col);
         count += self.cells[s] as u8;
 
         let se = self.get_index(south, east);
@@ -84,16 +73,13 @@ impl Universe {
         count
     }
 
-    pub fn toggle_cell(&mut self, row: u32, column: u32) {
-        let idx = self.get_index(row, column);
+    pub fn toggle_cell(&mut self, row: u32, col: u32) {
+        let idx = self.get_index(row, col);
         self.cells[idx].toggle();
     }
 
-    pub fn new() -> Self {
+    pub fn new(width: u32, height: u32) -> Self {
         console_error_panic_hook::set_once();
-
-        let width = 128;
-        let height = 128;
 
         log!("Creating a {} by {} universe", width, height);
 

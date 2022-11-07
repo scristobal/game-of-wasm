@@ -13,7 +13,7 @@
 
 1. Compile to WASM and create a NPM package with `wasm-pack build --target bundler` or use `Makefile`, eg `make wasm`. Output will be in the `pkg/` folder
 
-2. Execute `npm run build`. This will remove any existing `npm link`, install modules and build the app.
+2. Go to`site/` and execute `npm run build`. This will remove any existing `npm link`, install modules and build the app.
 
 3. Add `glife_wasm_bg.wasm.d.ts` to the `files` array in `pkg/package.json`. Related to <https://github.com/rustwasm/wasm-pack/issues/990> but not exactly, files are included but not definitions.
 

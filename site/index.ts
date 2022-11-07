@@ -1,11 +1,11 @@
 const { Universe, Cell } = await import('glife-wasm');
 const { memory } = await import('glife-wasm/glife_wasm_bg.wasm');
 
-const CELL_SIZE = 5; // px
+const CELL_SIZE = 1; // px
 const DEAD_COLOR = '#FFFFFF';
 const ALIVE_COLOR = '#000000';
 
-const universe = Universe.new();
+const universe = Universe.new(512, 512);
 const width = universe.width();
 const height = universe.height();
 
@@ -35,8 +35,8 @@ canvas.addEventListener('mousemove', (event) => {
     drawCells(ctx);
 });
 
-canvas.height = (CELL_SIZE + 1) * height + 1;
-canvas.width = (CELL_SIZE + 1) * width + 1;
+canvas.height = CELL_SIZE * height;
+canvas.width = CELL_SIZE * width;
 
 const renderLoop = () => {
     updateFps();
@@ -55,33 +55,22 @@ const drawCells = (ctx: CanvasRenderingContext2D) => {
     const cellsPtr = universe.cells();
     const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
 
-    ctx.beginPath();
+    const img = ctx.createImageData(width, height);
 
-    ctx.fillStyle = ALIVE_COLOR;
-    for (let row = 0; row < height; row++) {
-        for (let col = 0; col < width; col++) {
-            const idx = getIndex(row, col);
-            if (cells[idx] !== Cell.Alive) {
-                continue;
-            }
+    const data = img.data;
 
-            ctx.fillRect(col * (CELL_SIZE + 1) + 1, row * (CELL_SIZE + 1) + 1, CELL_SIZE, CELL_SIZE);
-        }
+    for (let idx = 0; idx < cells.length; idx++) {
+        data[4 * idx] = cells[idx] === Cell.Alive ? 0 : 255;
+        data[4 * idx + 1] = cells[idx] === Cell.Alive ? 0 : 255;
+        data[4 * idx + 2] = cells[idx] === Cell.Alive ? 0 : 255;
+        data[4 * idx + 3] = 255;
     }
 
-    // Dead cells.
-    ctx.fillStyle = DEAD_COLOR;
-    for (let row = 0; row < height; row++) {
-        for (let col = 0; col < width; col++) {
-            const idx = getIndex(row, col);
-            if (cells[idx] !== Cell.Dead) {
-                continue;
-            }
-
-            ctx.fillRect(col * (CELL_SIZE + 1) + 1, row * (CELL_SIZE + 1) + 1, CELL_SIZE, CELL_SIZE);
-        }
-    }
-    ctx.stroke();
+    createImageBitmap(img, {
+        resizeHeight: CELL_SIZE * height,
+        resizeWidth: CELL_SIZE * height,
+        resizeQuality: 'pixelated',
+    }).then((img) => ctx.drawImage(img, 0, 0));
 };
 
 const fps = document.getElementById('fps')!;
