@@ -1,106 +1,42 @@
 # Rust-WASM experiments 🦀 🕸
 
-## Instructions
+This repo is a playground for experimentation with the interplay between Rust and Web Assembly.
+
+So far there is an implementation og Conway's Game of Life written in Web Assembly and compiled to Rust and a frontend to visualize the algorithm.
+
+Most of the code is from the Rust-WASM book (link below), with a few tweaks and updates.
+
+If you just want to see the result go here <https://samuelsh-glife-wasm.vercel.app/>
+
+## 🏗️ Structure
+
+The repo has two main components:
+
+- A Rust project a the `root/`
+- A sample webpage in `site/`
+
+You need to build the Rust project first and then bring it into the sample website, either locally or using NPM.
 
 ### 🍳 Run locally
 
 1. Compile to WASM and create a NPM package with `wasm-pack build --target bundler` or use `Makefile`, eg `make wasm`. Output will be in the `pkg/` folder
-2. Go to `/site` install deps with `npm i` and run a dev server with `npm run dev`. This will create a `npm link` under the hood to `../pkg`
+2. Go to `/site` install deps with `npm i` and run a dev server with `npm run dev`. Under the hood, this will create a `npm link` to `../pkg`
 
-### 📦 Publish
+### 📦 Publish to NPM
 
-0. Update version number on `Cargo.toml`
+1. Update version number on `Cargo.toml`
+2. Compile to WASM and create a NPM package with `wasm-pack build --target bundler` or use `Makefile`, eg `make wasm`. Output will be in the `pkg/` folder
+3. Go to`site/` and execute `npm run build`. This will remove any existing `npm link`, install modules and build the app.
+4. Add `glife_wasm_bg.wasm.d.ts` to the `files` array in `pkg/package.json`. Related to <https://github.com/rustwasm/wasm-pack/issues/990> but not exactly, files are included but not definitions.
 
-1. Compile to WASM and create a NPM package with `wasm-pack build --target bundler` or use `Makefile`, eg `make wasm`. Output will be in the `pkg/` folder
+### 🕸️ Upload to the Web
 
-2. Go to`site/` and execute `npm run build`. This will remove any existing `npm link`, install modules and build the app.
-
-3. Add `glife_wasm_bg.wasm.d.ts` to the `files` array in `pkg/package.json`. Related to <https://github.com/rustwasm/wasm-pack/issues/990> but not exactly, files are included but not definitions.
-
-## 🗓 change log
-
-### Sun 21 Aug 2022
-
-Follow MDN tutorial, [Rust-WASM](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm).
-
-- Created a library crate
-- Use `wasm_bindgen` to generate bindings:
-  - Call JS's `alert` from Rust
-  - Call a Rust function `greet` from JS
-- Compiled to WASM
-- Tests on local server
-- Create a NPM symlink package
-- Import NPM symlink into a sample project
-- Run the sample project
-
-This was similar to <https://rustwasm.github.io/docs/wasm-bindgen/examples/hello-world.html> although that seems to be a bit out of date, check the comment on webpack imports
-
-Next:
-
-- Configure TypeScript in the sample project, and check imports and definitions.
-
-### Mon 22 Aug 2022
-
-Done today:
-
-- Updated to webpack 5
-- Transpiled using SWC 🦀
-- Added TypeScript
-- Used top level await and wasm async experimental features
-- A very rude performance test
-
-Next:
-
-- Try something more ambitious, follow up tutorial from rust-wasm book
-
-### Sat 1 Oct 2022
-
-Done today:
-
-- Adapted example from [rust-wasm book](https://rustwasm.github.io/docs/book/game-of-life/introduction.html) to use TypeScript and SWC on Webpack.
-- Followed until <https://rustwasm.github.io/docs/book/game-of-life/implementing.html#rendering-to-canvas-directly-from-memory>
-
-Next:
-
-- Continue book example
-
-### Sun 2 Oct 2022
-
-- Published to NPM <https://www.npmjs.com/package/glife-wasm>
-- Deployed to Vercel <https://samuelsh-glife-wasm.vercel.app/>
-- Improved NPM scripts for development and build
-- Bug hunting re. `wasm-pack build`  <https://github.com/rustwasm/wasm-pack/issues/990>
-- Exercises section 4.4 rust-wasm book
-
-### Sun 9 Oct 2022
-
-- Added interactivity
-- Styled with PicoCSS
-
-Next:
-
-- Try to write directly into memory.
-
-### Tue 11 Oct 2022
-
-- Cells are modified directly in memory on mouse over.
-- Removed pause interaction
-- Headless tests w/ `wasm_bindgen_test`
-
-Next:
-
-- Continue rust-wasm book
-
-### Wed 12 Oct 2022
-
-- Bump rand dep, fixed feature errors
-- Fixed `extern crate` error on `tests/`
-- Profiling and optimizations
+Nothing to do, Vercel deploys `main` branch automatically to  <https://samuelsh-glife-wasm.vercel.app/>
 
 ## To do list
 
 - [x] [MDN's Rust-WASM intro](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm).
-- [ ] A slightly more involved example with the [Rust-wasm book 📖](https://rustwasm.github.io/docs/book/)
+- [x] A slightly more involved example with the [Rust-wasm book 📖](https://rustwasm.github.io/docs/book/)
 - [ ] Remaining exercises [time-optimization](<https://rustwasm.github.io/docs/book/game-of-life/time-profiling.html#exercises>) and [size-optimization](https://rustwasm.github.io/docs/book/game-of-life/code-size.html#exercises)
 - [ ] Check out the [`js!` macro](https://docs.rs/stdweb/0.4.0/stdweb/macro.js.html)
 - [ ] [wasm-bindgen](https://rustwasm.github.io/docs/wasm-bindgen/)
