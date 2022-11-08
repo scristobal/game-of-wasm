@@ -11,9 +11,10 @@ const height = universe.height();
 
 const canvas = document.getElementById('game-of-life-canvas') as HTMLCanvasElement;
 
-const ctx = canvas.getContext('2d')!;
+canvas.height = height;
+canvas.width = width;
 
-const ctx3d = canvas.getContext('webgl')!;
+const ctx = canvas.getContext('2d')!;
 
 canvas.addEventListener('mousemove', (event) => {
     const boundingRect = canvas.getBoundingClientRect();
@@ -24,31 +25,30 @@ canvas.addEventListener('mousemove', (event) => {
     const canvasLeft = (event.clientX - boundingRect.left) * scaleX;
     const canvasTop = (event.clientY - boundingRect.top) * scaleY;
 
-    const row = Math.min(Math.floor(canvasTop / (CELL_SIZE + 1)), height - 1);
-    const col = Math.min(Math.floor(canvasLeft / (CELL_SIZE + 1)), width - 1);
+    const row = Math.min(Math.floor(canvasTop / CELL_SIZE), height);
+    const col = Math.min(Math.floor(canvasLeft / CELL_SIZE), width);
 
     const cellsPtr = universe.cells();
     const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
 
-    cells[getIndex(row, col)] = cells[getIndex(row, col)] === Cell.Dead ? Cell.Alive : Cell.Dead;
+    const index = row * width + col;
+
+    const isAlive = cells[index] === Cell.Dead;
+
+    cells[index] = isAlive ? Cell.Alive : Cell.Dead;
 
     drawCells(ctx);
 });
 
-canvas.height = CELL_SIZE * height;
-canvas.width = CELL_SIZE * width;
-
 const renderLoop = () => {
-    updateFps();
+    const currentTime = performance.now();
+
     universe.tick();
-
-    // drawGrid(ctx);
     drawCells(ctx);
-    requestAnimationFrame(renderLoop);
-};
 
-const getIndex = (row: number, column: number) => {
-    return row * width + column;
+    renderTime(currentTime);
+
+    requestAnimationFrame(renderLoop);
 };
 
 const drawCells = (ctx: CanvasRenderingContext2D) => {
@@ -66,44 +66,30 @@ const drawCells = (ctx: CanvasRenderingContext2D) => {
         data[4 * idx + 3] = 255;
     }
 
-    createImageBitmap(img, {
-        resizeHeight: CELL_SIZE * height,
-        resizeWidth: CELL_SIZE * height,
-        resizeQuality: 'pixelated',
-    }).then((img) => ctx.drawImage(img, 0, 0));
+    ctx.putImageData(img, 0, 0);
+
+    //createImageBitmap(img).then((img) => ctx.drawImage(img, 0, 0));
 };
 
 const fps = document.getElementById('fps')!;
-const frames: number[] = [];
-let lastFrameTimeStamp = performance.now();
+const times: number[] = [];
 
-const updateFps = function () {
-    // Convert the delta time since the last frame render into a measure
-    // of frames per second.
+const renderTime = function (initialTime: number) {
     const now = performance.now();
-    const delta = now - lastFrameTimeStamp;
-    lastFrameTimeStamp = now;
-    const currentFps = (1 / delta) * 1000;
+    const delta = now - initialTime;
 
-    // Save only the latest 100 timings.
-    frames.push(currentFps);
-    if (frames.length > 100) {
-        frames.shift();
+    times.push(delta);
+    if (times.length > 100) {
+        times.shift();
     }
 
-    // Find the max, min, and mean of our 100 latest timings.
-    let min = Infinity;
-    let max = -Infinity;
     let sum = 0;
-    for (let i = 0; i < frames.length; i++) {
-        sum += frames[i]!;
-        min = Math.min(frames[i]!, min);
-        max = Math.max(frames[i]!, max);
+    for (let i = 0; i < times.length; i++) {
+        sum += times[i]!;
     }
-    let mean = sum / frames.length;
+    let mean = sum / times.length;
 
-    // Render the statistics.
-    fps.textContent = `running at ${Math.round(mean)} fps`;
+    fps.textContent = `Render time ${Math.round(mean)} ms`;
 };
 
 drawCells(ctx);
