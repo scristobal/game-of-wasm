@@ -103,13 +103,7 @@ const updateFps = function () {
     let mean = sum / frames.length;
 
     // Render the statistics.
-    fps.textContent = `
-Frames per Second:
-         latest = ${Math.round(currentFps)}
-avg of last 100 = ${Math.round(mean)}
-min of last 100 = ${Math.round(min)}
-max of last 100 = ${Math.round(max)}
-`.trim();
+    fps.textContent = `running at ${Math.round(mean)} fps`;
 };
 
 drawCells(ctx);
