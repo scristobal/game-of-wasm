@@ -41,12 +41,20 @@ canvas.addEventListener('mousemove', (event) => {
 });
 
 const renderLoop = () => {
-    const currentTime = performance.now();
+    const beforeTime = performance.now();
+
+    performance.mark('render-loop-in');
 
     universe.tick();
+
+    performance.mark('after-tick');
+
     drawCells(ctx);
 
-    renderTime(currentTime);
+    performance.mark('after-render');
+
+    tickTimer.updateRenderTimes(beforeTime, performance.now());
+    tickTimer.render();
 
     requestAnimationFrame(renderLoop);
 };
@@ -71,26 +79,36 @@ const drawCells = (ctx: CanvasRenderingContext2D) => {
     //createImageBitmap(img).then((img) => ctx.drawImage(img, 0, 0));
 };
 
-const fps = document.getElementById('fps')!;
-const times: number[] = [];
+class TickTimer {
+    times: number[] = Array(100);
+    htmlElement: HTMLElement;
 
-const renderTime = function (initialTime: number) {
-    const now = performance.now();
-    const delta = now - initialTime;
-
-    times.push(delta);
-    if (times.length > 100) {
-        times.shift();
+    constructor(elementId: string) {
+        this.htmlElement = document.getElementById(elementId)!;
     }
 
-    let sum = 0;
-    for (let i = 0; i < times.length; i++) {
-        sum += times[i]!;
+    updateRenderTimes(initialTime: number, endTime: number) {
+        const delta = endTime - initialTime;
+        this.times.shift();
+        this.times.push(delta);
     }
-    let mean = sum / times.length;
 
-    fps.textContent = `Render time ${Math.round(mean)} ms`;
-};
+    getAverageRenderTimes() {
+        let sum = 0;
+        for (let i = 0; i < this.times.length; i++) {
+            sum += this.times[i]!;
+        }
+        let mean = sum / this.times.length;
+
+        return Math.round(mean);
+    }
+
+    render() {
+        this.htmlElement.textContent = `Render time ${this.getAverageRenderTimes()} ms`;
+    }
+}
+
+const tickTimer = new TickTimer('fps');
 
 drawCells(ctx);
 renderLoop();
