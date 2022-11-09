@@ -78,3 +78,10 @@ Next:
 - Bump rand dep, fixed feature errors
 - Fixed `extern crate` error on `tests/`
 - Profiling and optimizations
+
+## Sun 5 Nov 2022
+
+- Improved canvas drawing performance drastically, using bitmap image
+- Fixed user interactions
+- New timer class
+- Tiding up README and docs
