@@ -16,6 +16,8 @@ canvas.width = width;
 
 const ctx = canvas.getContext('2d')!;
 
+ctx.font = '28px VT323';
+
 canvas.addEventListener('mousemove', (event) => {
     const boundingRect = canvas.getBoundingClientRect();
 
@@ -81,10 +83,10 @@ const drawCells = (ctx: CanvasRenderingContext2D) => {
 
 class TickTimer {
     times: number[] = Array(100);
-    htmlElement: HTMLElement;
+    ctx: CanvasRenderingContext2D;
 
-    constructor(elementId: string) {
-        this.htmlElement = document.getElementById(elementId)!;
+    constructor(ctx: CanvasRenderingContext2D) {
+        this.ctx = ctx!;
     }
 
     updateRenderTimes(initialTime: number, endTime: number) {
@@ -100,15 +102,15 @@ class TickTimer {
         }
         let mean = sum / this.times.length;
 
-        return Math.round(mean);
+        return Math.round(mean).toString();
     }
 
     render() {
-        this.htmlElement.textContent = `Render time ${this.getAverageRenderTimes()} ms`;
+        this.ctx.fillText(`${this.getAverageRenderTimes()}ms`, 10, 30);
     }
 }
 
-const tickTimer = new TickTimer('fps');
+const tickTimer = new TickTimer(ctx);
 
 drawCells(ctx);
 renderLoop();
