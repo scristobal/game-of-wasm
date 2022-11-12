@@ -4,10 +4,12 @@
 <head>
     <meta charset="utf-8" />
     <title>Glife-wasm</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./assets//favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./assets//favicon-16x16.png">
+    <link rel="manifest" href="./assets//site.webmanifest">
     <script defer src="./index.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-
         body {
             position: absolute;
             top: 0;
@@ -19,16 +21,11 @@
             align-items: center;
             justify-content: center;
         }
-
-        #fps {
-            white-space: pre;
-            font-family: monospace;
-        }
     </style>
 </head>
 
 <body>
-    <canvas id="game-of-life-canvas"></canvas>
+    <game-of-life width="512" height="512" />
 </body>
 
 </html>

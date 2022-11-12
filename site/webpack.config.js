@@ -9,8 +9,6 @@ module.exports = {
     },
     experiments: {
         asyncWebAssembly: true,
-        syncWebAssembly: true,
-        topLevelAwait: true,
     },
     mode: 'development',
     module: {
@@ -33,7 +31,7 @@ module.exports = {
     },
     plugins: [
         new CopyPlugin({
-            patterns: ['./index.html'],
+            patterns: ['./index.html', './assets/*'],
         }),
     ],
 };

@@ -85,3 +85,10 @@ Next:
 - Fixed user interactions
 - New timer class
 - Tiding up README and docs
+
+## Sat 11 Nov 2022
+
+- Encapsulated in a Web Component
+- Responsive to width and height attributes
+- Styles, favicon, and font
+- Cleanup dependencies and webpack settings

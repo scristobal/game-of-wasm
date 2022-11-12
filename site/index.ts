@@ -1,118 +1,161 @@
-const { Universe, Cell } = await import('glife-wasm');
-const { memory } = await import('glife-wasm/glife_wasm_bg.wasm');
-
-const CELL_SIZE = 1; // px
-const DEAD_COLOR = '#FFFFFF';
-const ALIVE_COLOR = '#000000';
-
-const universe = Universe.new(512, 512);
-const width = universe.width();
-const height = universe.height();
-
-const canvas = document.getElementById('game-of-life-canvas') as HTMLCanvasElement;
-
-canvas.height = height;
-canvas.width = width;
-
-const ctx = canvas.getContext('2d')!;
-
-ctx.font = '28px VT323';
-
-canvas.addEventListener('mousemove', (event) => {
-    const boundingRect = canvas.getBoundingClientRect();
-
-    const scaleX = canvas.width / boundingRect.width;
-    const scaleY = canvas.height / boundingRect.height;
-
-    const canvasLeft = (event.clientX - boundingRect.left) * scaleX;
-    const canvasTop = (event.clientY - boundingRect.top) * scaleY;
-
-    const row = Math.min(Math.floor(canvasTop / CELL_SIZE), height);
-    const col = Math.min(Math.floor(canvasLeft / CELL_SIZE), width);
-
-    const cellsPtr = universe.cells();
-    const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
-
-    const index = row * width + col;
-
-    const isAlive = cells[index] === Cell.Dead;
-
-    cells[index] = isAlive ? Cell.Alive : Cell.Dead;
-
-    drawCells(ctx);
-});
-
-const renderLoop = () => {
-    const beforeTime = performance.now();
-
-    performance.mark('render-loop-in');
-
-    universe.tick();
-
-    performance.mark('after-tick');
-
-    drawCells(ctx);
-
-    performance.mark('after-render');
-
-    tickTimer.updateRenderTimes(beforeTime, performance.now());
-    tickTimer.render();
-
-    requestAnimationFrame(renderLoop);
-};
-
-const drawCells = (ctx: CanvasRenderingContext2D) => {
-    const cellsPtr = universe.cells();
-    const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
-
-    const img = ctx.createImageData(width, height);
-
-    const data = img.data;
-
-    for (let idx = 0; idx < cells.length; idx++) {
-        data[4 * idx] = cells[idx] === Cell.Alive ? 0 : 255;
-        data[4 * idx + 1] = cells[idx] === Cell.Alive ? 0 : 255;
-        data[4 * idx + 2] = cells[idx] === Cell.Alive ? 0 : 255;
-        data[4 * idx + 3] = 255;
-    }
-
-    ctx.putImageData(img, 0, 0);
-
-    //createImageBitmap(img).then((img) => ctx.drawImage(img, 0, 0));
-};
+import { Cell, Universe } from 'glife-wasm';
+import { memory } from 'glife-wasm/glife_wasm_bg.wasm';
 
 class TickTimer {
-    times: number[] = Array(100);
-    ctx: CanvasRenderingContext2D;
+    times: number[] = Array(10);
 
-    constructor(ctx: CanvasRenderingContext2D) {
-        this.ctx = ctx!;
-    }
-
-    updateRenderTimes(initialTime: number, endTime: number) {
-        const delta = endTime - initialTime;
+    set time(delta: number) {
         this.times.shift();
         this.times.push(delta);
     }
 
-    getAverageRenderTimes() {
+    get time() {
         let sum = 0;
         for (let i = 0; i < this.times.length; i++) {
             sum += this.times[i]!;
         }
         let mean = sum / this.times.length;
 
-        return Math.round(mean).toString();
-    }
-
-    render() {
-        this.ctx.fillText(`${this.getAverageRenderTimes()}ms`, 10, 30);
+        return Math.round(mean);
     }
 }
 
-const tickTimer = new TickTimer(ctx);
+class GameOfLife extends HTMLElement {
+    width = 512;
+    height = 512;
 
-drawCells(ctx);
-renderLoop();
+    universe = Universe.new(this.width, this.height);
+    memory = memory;
 
-export {};
+    canvas = document.createElement('canvas');
+    ctx = this.canvas.getContext('2d')!;
+
+    tickTimer = new TickTimer();
+
+    constructor() {
+        super();
+
+        this.canvas.height = this.height;
+        this.canvas.width = this.width;
+
+        this.canvas.addEventListener('mousemove', this.#mouseMoveHandler.bind(this));
+
+        /**
+         * this is a workaround to @import statements not allowed on CSSStyleSheet API:
+         *  https://web.dev/constructable-stylesheets/
+         *  https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/insertRule
+         */
+        const fontLoader = document.createElement('style');
+        fontLoader.textContent = `@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');`;
+        document.head.appendChild(fontLoader);
+
+        this.ctx.font = '14px VT323';
+        this.ctx.imageSmoothingEnabled = false;
+
+        const style = new CSSStyleSheet();
+        style.insertRule(`canvas {
+                image-rendering: pixelated;
+                image-rendering: crisp-edges;
+            }`);
+
+        const shadowRoot = this.attachShadow({ mode: 'open' });
+
+        shadowRoot.appendChild(this.canvas);
+        shadowRoot.adoptedStyleSheets = [style];
+    }
+
+    connectedCallback() {
+        this.#drawCells();
+        this.#renderLoop();
+    }
+
+    static get observedAttributes() {
+        return ['width', 'height'];
+    }
+
+    attributeChangedCallback(property: 'width' | 'height', _oldValue: number, newValue: number) {
+        if (property === 'height') this.#rescale(newValue, this.width);
+        if (property === 'width') this.#rescale(this.height, newValue);
+    }
+
+    #mouseMoveHandler(event: MouseEvent) {
+        const canvas = this.shadowRoot!.querySelector('canvas')!;
+        const boundingRect = canvas.getBoundingClientRect();
+
+        const scaleX = canvas.width / boundingRect.width;
+        const scaleY = canvas.height / boundingRect.height;
+
+        const canvasLeft = (event.clientX - boundingRect.left) * scaleX;
+        const canvasTop = (event.clientY - boundingRect.top) * scaleY;
+
+        const row = Math.min(Math.floor(canvasTop /* / CELL_SIZE */), this.height);
+        const col = Math.min(Math.floor(canvasLeft /* / CELL_SIZE */), this.width);
+
+        const cellsPtr = this.universe.cells();
+        const cells = new Uint8Array(this.memory.buffer, cellsPtr, this.width * this.height);
+
+        const index = row * this.width + col;
+
+        const isDead = cells[index] === Cell.Dead;
+
+        cells[index] = isDead ? Cell.Alive : Cell.Dead;
+
+        this.#drawCells();
+    }
+
+    #rescale(height: number, width: number) {
+        this.height = height;
+        this.width = width;
+
+        const canvas = this.shadowRoot!.querySelector('canvas')!;
+
+        canvas.height = this.height;
+        canvas.width = this.width;
+
+        this.universe = Universe.new(this.width, this.height);
+    }
+
+    #drawCells() {
+        const cellsPtr = this.universe.cells();
+        const cells = new Uint8Array(this.memory.buffer, cellsPtr, this.width * this.height);
+
+        const img = this.ctx.createImageData(this.width, this.height);
+
+        const data = img.data;
+
+        for (let idx = 0; idx < cells.length; idx++) {
+            data[4 * idx] = cells[idx] === Cell.Alive ? 0 : 255;
+            data[4 * idx + 1] = cells[idx] === Cell.Alive ? 0 : 255;
+            data[4 * idx + 2] = cells[idx] === Cell.Alive ? 0 : 255;
+            data[4 * idx + 3] = 255;
+        }
+
+        this.ctx.putImageData(img, 0, 0);
+
+        const txt = `${this.tickTimer.time.toFixed(0)}ms`;
+        const metrics = this.ctx.measureText(txt);
+        this.ctx.fillText(txt, this.width - metrics.width, this.height - metrics.actualBoundingBoxDescent);
+    }
+
+    #renderLoop() {
+        const beforeTime = performance.now();
+
+        this.universe.tick();
+
+        this.#drawCells();
+
+        this.tickTimer.time = performance.now() - beforeTime;
+
+        requestAnimationFrame(this.#renderLoop.bind(this));
+    }
+}
+
+declare global {
+    interface HTMLElementTagNameMap {
+        'game-of-life': GameOfLife;
+    }
+}
+
+customElements.define('game-of-life', GameOfLife);
+
+export { GameOfLife };
