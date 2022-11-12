@@ -22,6 +22,20 @@ Check the result here <https://samuelsh-glife-wasm.vercel.app/> or use it as
 </html>
 ```
 
+Check out the NPM module at <https://www.npmjs.com/package/glife-wasm>, a minimal example
+
+```typescript
+const { Universe } = await import('glife-wasm');
+const { memory } = await import('glife-wasm/glife_wasm_bg.wasm');
+
+const universe = Universe.new(512, 512);
+
+universe.tick();
+
+const cellsPtr = universe.cells();
+const cells = new Uint8Array(memory.buffer, cellsPtr, 512 * 512);
+```
+
 ## 🏗️ Structure
 
 The repo has two main components:
