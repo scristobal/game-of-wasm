@@ -1,96 +1,121 @@
-import { Cell as C, Universe as U } from 'glife-wasm';
-import { LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { Cell, Universe } from 'glife-wasm';
+import { memory } from 'glife-wasm/glife_wasm_bg.wasm';
 
 class TickTimer {
-    times: number[] = Array(100);
-    ctx: CanvasRenderingContext2D;
+    times: number[] = Array(10);
 
-    constructor(ctx: CanvasRenderingContext2D) {
-        this.ctx = ctx!;
-    }
-
-    updateRenderTimes(initialTime: number, endTime: number) {
-        const delta = endTime - initialTime;
+    set time(delta: number) {
         this.times.shift();
         this.times.push(delta);
     }
 
-    getAverageRenderTimes() {
+    get time() {
         let sum = 0;
         for (let i = 0; i < this.times.length; i++) {
             sum += this.times[i]!;
         }
         let mean = sum / this.times.length;
 
-        return Math.round(mean).toString();
-    }
-
-    render() {
-        this.ctx.fillText(`${this.getAverageRenderTimes()}ms`, 10, 30);
+        return Math.round(mean);
     }
 }
 
-@customElement('game-of-life')
-class GameOfLife extends LitElement {
-    universe: U;
-    width: number;
-    height: number;
+class GameOfLife extends HTMLElement {
+    width = 512;
+    height = 512;
 
-    memory: WebAssembly.Memory;
+    universe = Universe.new(this.width, this.height);
+    memory = memory;
 
-    canvas: HTMLCanvasElement;
-    ctx: CanvasRenderingContext2D;
-    tickTimer: TickTimer;
+    canvas = document.createElement('canvas');
+    ctx = this.canvas.getContext('2d')!;
 
-    constructor(Universe: typeof U, Cell: typeof C, memory: WebAssembly.Memory) {
+    tickTimer = new TickTimer();
+
+    constructor() {
         super();
-
-        this.canvas = document.createElement('canvas');
-
-        this.ctx = this.canvas.getContext('2d')!;
-        this.ctx.font = '28px VT323';
-
-        this.tickTimer = new TickTimer(this.ctx);
-
-        this.universe = Universe.new(512, 512);
-        this.width = this.universe.width();
-        this.height = this.universe.height();
-
-        this.memory = memory;
 
         this.canvas.height = this.height;
         this.canvas.width = this.width;
 
-        this.canvas.addEventListener('mousemove', (event) => {
-            const boundingRect = this.canvas.getBoundingClientRect();
+        this.canvas.addEventListener('mousemove', this.#mouseMoveHandler.bind(this));
 
-            const scaleX = this.canvas.width / boundingRect.width;
-            const scaleY = this.canvas.height / boundingRect.height;
+        /**
+         * this is a workaround to @import statements not allowed on CSSStyleSheet API:
+         *  https://web.dev/constructable-stylesheets/
+         *  https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/insertRule
+         */
+        const fontLoader = document.createElement('style');
+        fontLoader.textContent = `@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');`;
+        document.head.appendChild(fontLoader);
 
-            const canvasLeft = (event.clientX - boundingRect.left) * scaleX;
-            const canvasTop = (event.clientY - boundingRect.top) * scaleY;
+        this.ctx.font = '14px VT323';
+        this.ctx.imageSmoothingEnabled = false;
 
-            const row = Math.min(Math.floor(canvasTop /* / CELL_SIZE */), this.height);
-            const col = Math.min(Math.floor(canvasLeft /* / CELL_SIZE */), this.width);
+        const style = new CSSStyleSheet();
+        style.insertRule(`canvas {
+                image-rendering: pixelated;
+                image-rendering: crisp-edges;
+            }`);
 
-            const cellsPtr = this.universe.cells();
-            const cells = new Uint8Array(this.memory.buffer, cellsPtr, this.width * this.height);
+        const shadowRoot = this.attachShadow({ mode: 'open' });
 
-            const index = row * this.width + col;
-
-            const isAlive = cells[index] === Cell.Dead;
-
-            cells[index] = isAlive ? Cell.Alive : Cell.Dead;
-
-            this.drawCells();
-        });
-
-        this.drawCells();
-        this.renderLoop();
+        shadowRoot.appendChild(this.canvas);
+        shadowRoot.adoptedStyleSheets = [style];
     }
 
-    drawCells() {
+    connectedCallback() {
+        this.#drawCells();
+        this.#renderLoop();
+    }
+
+    static get observedAttributes() {
+        return ['width', 'height'];
+    }
+
+    attributeChangedCallback(property: 'width' | 'height', _oldValue: number, newValue: number) {
+        if (property === 'height') this.#rescale(newValue, this.width);
+        if (property === 'width') this.#rescale(this.height, newValue);
+    }
+
+    #mouseMoveHandler(event: MouseEvent) {
+        const canvas = this.shadowRoot!.querySelector('canvas')!;
+        const boundingRect = canvas.getBoundingClientRect();
+
+        const scaleX = canvas.width / boundingRect.width;
+        const scaleY = canvas.height / boundingRect.height;
+
+        const canvasLeft = (event.clientX - boundingRect.left) * scaleX;
+        const canvasTop = (event.clientY - boundingRect.top) * scaleY;
+
+        const row = Math.min(Math.floor(canvasTop /* / CELL_SIZE */), this.height);
+        const col = Math.min(Math.floor(canvasLeft /* / CELL_SIZE */), this.width);
+
+        const cellsPtr = this.universe.cells();
+        const cells = new Uint8Array(this.memory.buffer, cellsPtr, this.width * this.height);
+
+        const index = row * this.width + col;
+
+        const isDead = cells[index] === Cell.Dead;
+
+        cells[index] = isDead ? Cell.Alive : Cell.Dead;
+
+        this.#drawCells();
+    }
+
+    #rescale(height: number, width: number) {
+        this.height = height;
+        this.width = width;
+
+        const canvas = this.shadowRoot!.querySelector('canvas')!;
+
+        canvas.height = this.height;
+        canvas.width = this.width;
+
+        this.universe = Universe.new(this.width, this.height);
+    }
+
+    #drawCells() {
         const cellsPtr = this.universe.cells();
         const cells = new Uint8Array(this.memory.buffer, cellsPtr, this.width * this.height);
 
@@ -99,30 +124,29 @@ class GameOfLife extends LitElement {
         const data = img.data;
 
         for (let idx = 0; idx < cells.length; idx++) {
-            data[4 * idx] = cells[idx] === C.Alive ? 0 : 255;
-            data[4 * idx + 1] = cells[idx] === C.Alive ? 0 : 255;
-            data[4 * idx + 2] = cells[idx] === C.Alive ? 0 : 255;
+            data[4 * idx] = cells[idx] === Cell.Alive ? 0 : 255;
+            data[4 * idx + 1] = cells[idx] === Cell.Alive ? 0 : 255;
+            data[4 * idx + 2] = cells[idx] === Cell.Alive ? 0 : 255;
             data[4 * idx + 3] = 255;
         }
 
         this.ctx.putImageData(img, 0, 0);
+
+        const txt = `${this.tickTimer.time.toFixed(0)}ms`;
+        const metrics = this.ctx.measureText(txt);
+        this.ctx.fillText(txt, this.width - metrics.width, this.height - metrics.actualBoundingBoxDescent);
     }
 
-    renderLoop() {
+    #renderLoop() {
         const beforeTime = performance.now();
 
         this.universe.tick();
 
-        this.drawCells();
+        this.#drawCells();
 
-        this.tickTimer.updateRenderTimes(beforeTime, performance.now());
-        this.tickTimer.render();
+        this.tickTimer.time = performance.now() - beforeTime;
 
-        requestAnimationFrame(this.renderLoop.bind(this));
-    }
-
-    render() {
-        return this.canvas;
+        requestAnimationFrame(this.#renderLoop.bind(this));
     }
 }
 
@@ -131,5 +155,7 @@ declare global {
         'game-of-life': GameOfLife;
     }
 }
+
+customElements.define('game-of-life', GameOfLife);
 
 export { GameOfLife };

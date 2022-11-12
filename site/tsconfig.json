@@ -14,9 +14,8 @@
         "isolatedModules": true,
         "jsx": "preserve",
         "incremental": true,
-        "noUncheckedIndexedAccess": true,
-        "experimentalDecorators": true
+        "noUncheckedIndexedAccess": true
     },
-    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+    "include": ["**/*.ts", "**/*.tsx"],
     "exclude": ["node_modules"]
 }
