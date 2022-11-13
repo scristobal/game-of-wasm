@@ -55,7 +55,7 @@ You need to build the Rust project first and then bring it into the sample websi
 1. Update version number on `Cargo.toml`
 2. Compile to WASM and create a NPM package with `wasm-pack build --target bundler` or use `Makefile`, eg `make wasm`. Output will be in the `pkg/` folder
 3. Go to`site/` and execute `npm run build`. This will remove any existing `npm link`, install modules and build the app.
-4. Add `glife_wasm_bg.wasm.d.ts` to the `files` array in `pkg/package.json`. Related to <https://github.com/rustwasm/wasm-pack/issues/990> but not exactly, files are included but not definitions.
+4. Add `glife_wasm_bg.wasm.d.ts` to the `files` array in `pkg/package.json`. Opened an issue <https://github.com/rustwasm/wasm-pack/issues/1193> and a PR <https://github.com/rustwasm/wasm-pack/pull/1194>
 
 ### 🕸️ Upload to the Web
 

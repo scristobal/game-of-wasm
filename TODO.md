@@ -5,7 +5,7 @@
 - [x] A slightly more involved example with the [Rust-wasm book 📖](https://rustwasm.github.io/docs/book/)
 - [ ] Remaining exercises [time-optimization](<https://rustwasm.github.io/docs/book/game-of-life/time-profiling.html#exercises>) and [size-optimization](https://rustwasm.github.io/docs/book/game-of-life/code-size.html#exercises)
 - [ ] Check out the [`js!` macro](https://docs.rs/stdweb/0.4.0/stdweb/macro.js.html)
-- [ ] Wrap it into a Web Component
+- [x] Wrap it into a Web Component
 - [ ] [wasm-bindgen](https://rustwasm.github.io/docs/wasm-bindgen/)
 - [ ] [wasm-pack](https://rustwasm.github.io/docs/wasm-pack/)
 - [ ] In general the [rust-wasm docs](https://rustwasm.github.io/docs.html) and blog!
