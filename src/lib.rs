@@ -5,8 +5,8 @@ extern crate console_error_panic_hook;
 mod utils;
 
 use rand;
-use utils::{log, Timer};
-use wasm_bindgen::prelude::*;
+use utils::log;
+use wasm_bindgen::{prelude::*, JsCast};
 
 #[wasm_bindgen]
 #[repr(u8)]
@@ -211,4 +211,75 @@ impl fmt::Display for Universe {
 
         Ok(())
     }
+}
+
+impl Universe {
+    pub fn draw(&self, ctx: web_sys::CanvasRenderingContext2d) -> Result<(), JsValue> {
+        let img = web_sys::ImageData::new_with_sw(self.width(), self.height())?;
+
+        let mut data = Vec::<u8>::new();
+
+        for idx in 0..self.width * self.height {
+            let cell = self.cells[idx as usize];
+
+            let color = match cell {
+                Cell::Dead => 255,
+                Cell::Alive => 0,
+            };
+
+            data.push(color);
+            data.push(color);
+            data.push(color);
+            data.push(255);
+        }
+
+        let img = web_sys::ImageData::new_with_u8_clamped_array_and_sh(
+            wasm_bindgen::Clamped(&mut data),
+            self.width(),
+            self.height(),
+        )?;
+
+        ctx.put_image_data(&img, 0.into(), 0.into())?;
+
+        Ok(())
+    }
+}
+
+#[wasm_bindgen(start)]
+pub fn main() -> Result<(), JsValue> {
+    // Use `web_sys`'s global `window` function to get a handle on the global
+    // window object.
+    let window = web_sys::window().expect("no global `window` exists");
+    let document = window.document().expect("should have a document on window");
+    let body = document.body().expect("document should have a body");
+
+    // Manufacture the element we're gonna append
+    let canvas = document
+        .create_element("canvas")?
+        .dyn_into::<web_sys::HtmlCanvasElement>()?;
+
+    canvas.set_height(512);
+    canvas.set_width(512);
+
+    canvas
+        .style()
+        .set_property("image-rendering", "pixelated")?;
+    canvas
+        .style()
+        .set_property("image-rendering", "crisp-edges")?;
+
+    let context = canvas
+        .get_context("2d")
+        .unwrap()
+        .unwrap()
+        .dyn_into::<web_sys::CanvasRenderingContext2d>()
+        .unwrap();
+
+    body.append_child(&canvas)?;
+
+    let universe = Universe::new(512, 512);
+
+    universe.draw(context)?;
+
+    Ok(())
 }

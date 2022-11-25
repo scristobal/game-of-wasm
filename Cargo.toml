@@ -13,7 +13,7 @@ default = ["console_error_panic_hook"]
 
 [dependencies]
 wasm-bindgen = "0.2.83"
-web-sys = { version = "0.3.60", features = ["console", 'CanvasRenderingContext2d','Document','Element','HtmlCanvasElement','Window',]}
+web-sys = { version = "0.3.60", features = ["console", 'CanvasRenderingContext2d','CssStyleDeclaration','ImageData', 'Document','Element','HtmlCanvasElement','Window',]}
 js-sys = "0.3.60"
 console_error_panic_hook = { version = "0.1.7", optional = true }
 getrandom = { version = "0.2.7", features = ["js"] }
