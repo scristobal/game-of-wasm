@@ -3,7 +3,9 @@
 
 - [x] [MDN's Rust-WASM intro](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm).
 - [x] A slightly more involved example with the [Rust-wasm book 📖](https://rustwasm.github.io/docs/book/)
+- [ ] Move to Trunk
 - [ ] Remaining exercises [time-optimization](<https://rustwasm.github.io/docs/book/game-of-life/time-profiling.html#exercises>) and [size-optimization](https://rustwasm.github.io/docs/book/game-of-life/code-size.html#exercises)
+- [ ] Check out `js_ffi` or [`js-wasm`](<https://github.com/richardanaya/js-wasm>) as the former seems deprecated
 - [ ] Check out the [`js!` macro](https://docs.rs/stdweb/0.4.0/stdweb/macro.js.html)
 - [x] Wrap it into a Web Component
 - [ ] [wasm-bindgen](https://rustwasm.github.io/docs/wasm-bindgen/)

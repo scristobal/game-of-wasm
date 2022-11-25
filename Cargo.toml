@@ -1,6 +1,6 @@
 [package]
 name = "glife-wasm"
-version = "0.5.5"
+version = "0.6.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -13,11 +13,11 @@ default = ["console_error_panic_hook"]
 
 [dependencies]
 wasm-bindgen = "0.2.83"
+web-sys = { version = "0.3.60", features = ["console", 'CanvasRenderingContext2d','Document','Element','HtmlCanvasElement','Window',]}
+js-sys = "0.3.60"
+console_error_panic_hook = { version = "0.1.7", optional = true }
 getrandom = { version = "0.2.7", features = ["js"] }
 rand = { version = "0.8.5"}
-web-sys = { version = "0.3.60", features = ["console"]}
-console_error_panic_hook = { version = "0.1.7", optional = true }
-
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.33"
