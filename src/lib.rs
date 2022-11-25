@@ -197,7 +197,7 @@ impl Universe {
     }
 }
 
-use std::fmt;
+use std::{cell::RefCell, fmt, rc::Rc};
 
 impl fmt::Display for Universe {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -214,7 +214,7 @@ impl fmt::Display for Universe {
 }
 
 impl Universe {
-    pub fn draw(&self, ctx: web_sys::CanvasRenderingContext2d) -> Result<(), JsValue> {
+    pub fn draw(&self, ctx: &web_sys::CanvasRenderingContext2d) -> Result<(), JsValue> {
         let img = web_sys::ImageData::new_with_sw(self.width(), self.height())?;
 
         let mut data = Vec::<u8>::new();
@@ -246,7 +246,7 @@ impl Universe {
 }
 
 #[wasm_bindgen(start)]
-pub fn main() -> Result<(), JsValue> {
+pub fn run() -> Result<(), JsValue> {
     // Use `web_sys`'s global `window` function to get a handle on the global
     // window object.
     let window = web_sys::window().expect("no global `window` exists");
@@ -258,15 +258,26 @@ pub fn main() -> Result<(), JsValue> {
         .create_element("canvas")?
         .dyn_into::<web_sys::HtmlCanvasElement>()?;
 
-    canvas.set_height(512);
-    canvas.set_width(512);
-
     canvas
         .style()
         .set_property("image-rendering", "pixelated")?;
     canvas
         .style()
         .set_property("image-rendering", "crisp-edges")?;
+
+    body.append_child(&canvas)?;
+
+    fn request_animation_frame(f: &Closure<dyn FnMut()>) {
+        web_sys::window()
+            .expect("no global window")
+            .request_animation_frame(f.as_ref().unchecked_ref())
+            .expect("should register `requestAnimationFrame` OK");
+    }
+
+    let mut universe = Universe::new(2048, 1024);
+
+    canvas.set_height(universe.height);
+    canvas.set_width(universe.width);
 
     let context = canvas
         .get_context("2d")
@@ -275,11 +286,18 @@ pub fn main() -> Result<(), JsValue> {
         .dyn_into::<web_sys::CanvasRenderingContext2d>()
         .unwrap();
 
-    body.append_child(&canvas)?;
+    let f = Rc::new(RefCell::new(Option::None));
+    let g = f.clone();
+    *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
+        universe.tick();
 
-    let universe = Universe::new(512, 512);
+        universe.draw(&context);
 
-    universe.draw(context)?;
+        // Schedule ourself for another requestAnimationFrame callback.
+        request_animation_frame(f.borrow().as_ref().unwrap());
+    }) as Box<dyn FnMut()>));
+
+    request_animation_frame(g.borrow().as_ref().unwrap());
 
     Ok(())
 }
