@@ -199,12 +199,7 @@ impl Universe {
     }
 }
 
-use std::{
-    cell::RefCell,
-    fmt,
-    rc::Rc,
-    time::{Duration, Instant},
-};
+use std::{cell::RefCell, fmt, rc::Rc, time::Duration};
 
 impl fmt::Display for Universe {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -298,7 +293,7 @@ pub fn run() -> Result<(), JsValue> {
             .expect("should register `requestAnimationFrame` OK");
     }
 
-    let mut universe = Universe::new(2048, 1024);
+    let mut universe = Universe::new(512, 512);
 
     canvas.set_height(universe.height as u32);
     canvas.set_width(universe.width as u32);
