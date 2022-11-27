@@ -4,9 +4,11 @@
 extern crate console_error_panic_hook;
 mod utils;
 
+use instant;
 use rand;
 use utils::log;
 use wasm_bindgen::{prelude::*, JsCast};
+use web_sys::CanvasRenderingContext2d;
 
 #[wasm_bindgen]
 #[repr(u8)]
@@ -27,18 +29,18 @@ impl Cell {
 
 #[wasm_bindgen]
 pub struct Universe {
-    width: u32,
-    height: u32,
+    width: usize,
+    height: usize,
     cells: Vec<Cell>,
 }
 
 #[wasm_bindgen]
 impl Universe {
-    fn get_index(&self, row: u32, col: u32) -> usize {
+    fn get_index(&self, row: usize, col: usize) -> usize {
         (row * self.width + col) as usize
     }
 
-    fn live_neighbor_count(&self, row: u32, col: u32) -> u8 {
+    fn live_neighbor_count(&self, row: usize, col: usize) -> u8 {
         let mut count = 0;
 
         let north = if row == 0 { self.height - 1 } else { row - 1 };
@@ -73,12 +75,12 @@ impl Universe {
         count
     }
 
-    pub fn toggle_cell(&mut self, row: u32, col: u32) {
+    pub fn toggle_cell(&mut self, row: usize, col: usize) {
         let idx = self.get_index(row, col);
         self.cells[idx].toggle();
     }
 
-    pub fn new(width: u32, height: u32) -> Self {
+    pub fn new(width: usize, height: usize) -> Self {
         console_error_panic_hook::set_once();
 
         log!("Creating a {} by {} universe", width, height);
@@ -101,25 +103,25 @@ impl Universe {
     }
 
     pub fn width(&self) -> u32 {
-        self.width
+        self.width as u32
     }
 
     /// Set the width of the universe.
     ///
     /// Resets all cells to the dead state.
-    pub fn set_width(&mut self, width: u32) {
+    pub fn set_width(&mut self, width: usize) {
         self.width = width;
         self.cells = (0..width * self.height).map(|_i| Cell::Dead).collect();
     }
 
     pub fn height(&self) -> u32 {
-        self.height
+        self.height as u32
     }
 
     /// Set the height of the universe.
     ///
     /// Resets all cells to the dead state.
-    pub fn set_height(&mut self, height: u32) {
+    pub fn set_height(&mut self, height: usize) {
         self.height = height;
         self.cells = (0..self.width * height).map(|_i| Cell::Dead).collect();
     }
@@ -189,7 +191,7 @@ impl Universe {
 
     /// Set cells to be alive in a universe by passing the row and column
     /// of each cell as an array.
-    pub fn set_cells(&mut self, cells: &[(u32, u32)]) {
+    pub fn set_cells(&mut self, cells: &[(usize, usize)]) {
         for (row, col) in cells.iter().cloned() {
             let idx = self.get_index(row, col);
             self.cells[idx] = Cell::Alive;
@@ -197,7 +199,12 @@ impl Universe {
     }
 }
 
-use std::{cell::RefCell, fmt, rc::Rc};
+use std::{
+    cell::RefCell,
+    fmt,
+    rc::Rc,
+    time::{Duration, Instant},
+};
 
 impl fmt::Display for Universe {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -217,7 +224,7 @@ impl Universe {
     pub fn draw(&self, ctx: &web_sys::CanvasRenderingContext2d) -> Result<(), JsValue> {
         let img = web_sys::ImageData::new_with_sw(self.width(), self.height())?;
 
-        let mut data = Vec::<u8>::new();
+        let mut data = Vec::<u8>::with_capacity(self.width * self.height);
 
         for idx in 0..self.width * self.height {
             let cell = self.cells[idx as usize];
@@ -245,6 +252,23 @@ impl Universe {
     }
 }
 
+fn draw_timer(
+    ctx: &CanvasRenderingContext2d,
+    dur: &Duration,
+    w: &u32,
+    h: &u32,
+) -> Result<(), JsValue> {
+    let txt = format!("{}ms", dur.as_millis());
+
+    let metrics = ctx.measure_text(&txt)?;
+
+    let w = f64::from(*w) - metrics.width();
+    let h = f64::from(*h) - metrics.actual_bounding_box_descent();
+
+    ctx.fill_text(&txt, w, h)?;
+
+    Ok(())
+}
 #[wasm_bindgen(start)]
 pub fn run() -> Result<(), JsValue> {
     // Use `web_sys`'s global `window` function to get a handle on the global
@@ -276,8 +300,8 @@ pub fn run() -> Result<(), JsValue> {
 
     let mut universe = Universe::new(2048, 1024);
 
-    canvas.set_height(universe.height);
-    canvas.set_width(universe.width);
+    canvas.set_height(universe.height as u32);
+    canvas.set_width(universe.width as u32);
 
     let context = canvas
         .get_context("2d")
@@ -286,12 +310,25 @@ pub fn run() -> Result<(), JsValue> {
         .dyn_into::<web_sys::CanvasRenderingContext2d>()
         .unwrap();
 
+    context.set_font("16px VT323");
+    context.set_image_smoothing_enabled(false);
+
     let f = Rc::new(RefCell::new(Option::None));
     let g = f.clone();
     *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
-        universe.tick();
+        let now = instant::Instant::now();
 
+        universe.tick();
         universe.draw(&context);
+
+        let elapsed_time = now.elapsed();
+
+        draw_timer(
+            &context,
+            &elapsed_time,
+            &universe.width(),
+            &universe.height(),
+        );
 
         // Schedule ourself for another requestAnimationFrame callback.
         request_animation_frame(f.borrow().as_ref().unwrap());
