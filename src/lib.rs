@@ -314,7 +314,7 @@ pub fn run() -> Result<(), JsValue> {
         let now = instant::Instant::now();
 
         universe.tick();
-        universe.draw(&context);
+        universe.draw(&context).expect("failed to draw universe");
 
         let elapsed_time = now.elapsed();
 
@@ -323,7 +323,8 @@ pub fn run() -> Result<(), JsValue> {
             &elapsed_time,
             &universe.width(),
             &universe.height(),
-        );
+        )
+        .expect("failed to draw timer");
 
         // Schedule ourself for another requestAnimationFrame callback.
         request_animation_frame(f.borrow().as_ref().unwrap());
