@@ -127,6 +127,8 @@ pub fn run() -> Result<(), JsValue> {
         .expect("button not found")
         .dyn_into::<web_sys::HtmlButtonElement>()?;
 
+    start_button.set_text_content(Some("Start!!"));
+
     let start = Closure::wrap(Box::new(move || {
         simulate();
     }) as Box<dyn FnMut()>);
@@ -134,6 +136,8 @@ pub fn run() -> Result<(), JsValue> {
     start_button.set_onclick(Some(start.as_ref().unchecked_ref()));
 
     start.forget();
+
+    simulate();
 
     Ok(())
 }
@@ -155,11 +159,11 @@ fn simulate() {
         .dyn_into::<web_sys::CanvasRenderingContext2d>()
         .unwrap();
 
-    fn request_animation_frame(f: &Closure<dyn FnMut()>) {
+    fn request_animation_frame(f: &Closure<dyn FnMut()>) -> i32 {
         web_sys::window()
             .expect("no global window")
             .request_animation_frame(f.as_ref().unchecked_ref())
-            .expect("should register `requestAnimationFrame` OK");
+            .expect("should register `requestAnimationFrame` OK")
     }
 
     let f = Rc::new(RefCell::new(Option::None));
@@ -179,6 +183,8 @@ fn simulate() {
 
     let mut rope = LongRope([Coords([(size / 2) as i32, (size / 2) as i32]); 10]);
     let mut trail = Trail(Vec::<Coords>::new());
+
+    let mut cancel = 0;
 
     *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
         let next_move = moves.pop().unwrap();
@@ -214,8 +220,8 @@ fn simulate() {
             .expect("failed to update canvas");
 
         // Schedule ourself for another requestAnimationFrame callback.
-        request_animation_frame(f.borrow().as_ref().unwrap());
-        /*
+        cancel = request_animation_frame(f.borrow().as_ref().unwrap());
+
         let window = web_sys::window().expect("no global `window` exists");
         let document = window.document().expect("should have a document on window");
 
@@ -225,19 +231,32 @@ fn simulate() {
             .dyn_into::<web_sys::HtmlButtonElement>()
             .unwrap();
 
-        start_button.set_disabled(true);
+        //start_button.set_text_content(Some("Stop"));
 
         let stop = Closure::wrap(Box::new(move || {
             web_sys::window()
                 .expect("no global window")
                 .cancel_animation_frame(cancel)
                 .unwrap();
+
+            run().unwrap();
+
+            let window = web_sys::window().expect("no global `window` exists");
+            let document = window.document().expect("should have a document on window");
+
+            let start_button = document
+                .get_element_by_id("start-button")
+                .expect("button not found")
+                .dyn_into::<web_sys::HtmlButtonElement>()
+                .unwrap();
+
+            start_button.click();
         }) as Box<dyn FnMut()>);
 
         start_button.set_onclick(Some(stop.as_ref().unchecked_ref()));
 
-        stop.forget();*/
+        stop.forget();
     }) as Box<dyn FnMut()>));
 
-    request_animation_frame(g.borrow().as_ref().unwrap());
+    cancel = request_animation_frame(g.borrow().as_ref().unwrap());
 }
