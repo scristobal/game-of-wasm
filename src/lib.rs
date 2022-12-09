@@ -179,6 +179,8 @@ fn simulate() {
 
     let (_, mut moves) = moves(&input).unwrap();
 
+    moves.reverse();
+
     let size = 512 as usize;
 
     let mut rope = LongRope([Coords([(size / 2) as i32, (size / 2) as i32]); 10]);
@@ -187,29 +189,27 @@ fn simulate() {
     let mut cancel = 0;
 
     *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
-        let next_move = moves.pop().unwrap();
+        let Some(next_move) = moves.pop() else { return};
 
         rope.mov(next_move);
 
         trail.0.push(rope.0[9]);
 
-        //let mut data = (0..(size * size)).map(|_| 255).collect::<Vec<u8>>();
-
-        let mut data = Vec::<u8>::new();
-
-        for _ in 0..(size * size) {
-            data.push(255);
-            data.push(255);
-            data.push(255);
-            data.push(255);
-        }
+        let mut data = (0..(4 * size * size)).map(|_| 255).collect::<Vec<u8>>();
 
         rope.draw(&mut data);
 
         trail.draw(&mut data);
 
+        let mut inv_data = data
+            .chunks(4 * size)
+            .rev()
+            .flatten()
+            .copied()
+            .collect::<Vec<_>>();
+
         let img = web_sys::ImageData::new_with_u8_clamped_array_and_sh(
-            wasm_bindgen::Clamped(&mut data),
+            wasm_bindgen::Clamped(&mut inv_data),
             size as u32,
             size as u32,
         )
