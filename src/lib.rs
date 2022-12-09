@@ -10,260 +10,138 @@ use utils::log;
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::CanvasRenderingContext2d;
 
-#[wasm_bindgen]
-#[repr(u8)]
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Cell {
-    Dead = 0,
-    Alive = 1,
-}
+use std::cell::RefCell;
+use std::collections::HashSet;
+use std::fmt::{self, Debug};
+use std::rc::Rc;
 
-impl Cell {
-    fn toggle(&mut self) {
-        *self = match *self {
-            Self::Dead => Self::Alive,
-            Self::Alive => Self::Dead,
-        };
-    }
-}
+use nom::branch::alt;
+use nom::character::complete;
+use nom::character::complete::newline;
+use nom::sequence::separated_pair;
+use nom::{bytes::complete::tag, multi::separated_list0, IResult};
+use std::include_str;
 
-#[wasm_bindgen]
-pub struct Universe {
-    width: usize,
-    height: usize,
-    cells: Vec<Cell>,
-}
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+struct Coords([i32; 2]);
 
-#[wasm_bindgen]
-impl Universe {
-    fn get_index(&self, row: usize, col: usize) -> usize {
-        (row * self.width + col) as usize
+impl Coords {
+    fn mov(&mut self, dir: &Coords) {
+        self.0[0] += dir.0[0];
+        self.0[1] += dir.0[1];
     }
 
-    fn live_neighbor_count(&self, row: usize, col: usize) -> u8 {
-        let mut count = 0;
-
-        let north = if row == 0 { self.height - 1 } else { row - 1 };
-        let south = if row == self.height - 1 { 0 } else { row + 1 };
-        let west = if col == 0 { self.width - 1 } else { col - 1 };
-        let east = if col == self.width - 1 { 0 } else { col + 1 };
-
-        let nw = self.get_index(north, west);
-        count += self.cells[nw] as u8;
-
-        let n = self.get_index(north, col);
-        count += self.cells[n] as u8;
-
-        let ne = self.get_index(north, east);
-        count += self.cells[ne] as u8;
-
-        let w = self.get_index(row, west);
-        count += self.cells[w] as u8;
-
-        let e = self.get_index(row, east);
-        count += self.cells[e] as u8;
-
-        let sw = self.get_index(south, west);
-        count += self.cells[sw] as u8;
-
-        let s = self.get_index(south, col);
-        count += self.cells[s] as u8;
-
-        let se = self.get_index(south, east);
-        count += self.cells[se] as u8;
-
-        count
+    fn diff(&self, coord: &Coords) -> Coords {
+        Coords([self.0[0] - coord.0[0], self.0[1] - coord.0[1]])
     }
 
-    pub fn toggle_cell(&mut self, row: usize, col: usize) {
-        let idx = self.get_index(row, col);
-        self.cells[idx].toggle();
-    }
-
-    pub fn new(width: usize, height: usize) -> Self {
-        console_error_panic_hook::set_once();
-
-        log!("Creating a {} by {} universe", width, height);
-
-        let cells = (0..width * height)
-            .map(|i| {
-                if rand::random::<f64>() > 0.5 {
-                    Cell::Alive
-                } else {
-                    Cell::Dead
-                }
-            })
-            .collect();
-
-        Self {
-            width,
-            height,
-            cells,
+    fn normalize(&mut self) {
+        if self.0[0].abs() <= 1 && self.0[1].abs() <= 1 {
+            *self = Coords([0, 0]);
         }
-    }
-
-    pub fn width(&self) -> u32 {
-        self.width as u32
-    }
-
-    /// Set the width of the universe.
-    ///
-    /// Resets all cells to the dead state.
-    pub fn set_width(&mut self, width: usize) {
-        self.width = width;
-        self.cells = (0..width * self.height).map(|_i| Cell::Dead).collect();
-    }
-
-    pub fn height(&self) -> u32 {
-        self.height as u32
-    }
-
-    /// Set the height of the universe.
-    ///
-    /// Resets all cells to the dead state.
-    pub fn set_height(&mut self, height: usize) {
-        self.height = height;
-        self.cells = (0..self.width * height).map(|_i| Cell::Dead).collect();
-    }
-
-    pub fn cells(&self) -> *const Cell {
-        self.cells.as_ptr()
-    }
-
-    pub fn render(&self) -> String {
-        self.to_string()
-    }
-
-    pub fn tick(&mut self) {
-        //let timer = Timer::new("Universe::tick");
-
-        let mut next = self.cells.clone();
-
-        for row in 0..self.height {
-            for col in 0..self.width {
-                let idx = self.get_index(row, col);
-                let cell = self.cells[idx];
-                let live_neighbors = self.live_neighbor_count(row, col);
-
-                /*log!(
-                    "cell[{}, {}] is initially {:?} and has {} live neighbors",
-                    row,
-                    col,
-                    cell,
-                    live_neighbors
-                );*/
-
-                let next_cell = match (cell, live_neighbors) {
-                    // Rule 1: Any live cell with fewer than two live neighbours
-                    // dies, as if caused by underpopulation.
-                    (Cell::Alive, x) if x < 2 => Cell::Dead,
-                    // Rule 2: Any live cell with two or three live neighbours
-                    // lives on to the next generation.
-                    (Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive,
-                    // Rule 3: Any live cell with more than three live
-                    // neighbours dies, as if by overpopulation.
-                    (Cell::Alive, x) if x > 3 => Cell::Dead,
-                    // Rule 4: Any dead cell with exactly three live neighbours
-                    // becomes a live cell, as if by reproduction.
-                    (Cell::Dead, 3) => Cell::Alive,
-                    // All other cells remain in the same state.
-                    (otherwise, _) => otherwise,
-                };
-
-                // log!("    it becomes {:?}", next_cell);
-                // panic!("test panic");
-
-                next[idx] = next_cell;
-            }
+        if self.0[0].abs() > 1 {
+            self.0[0] /= self.0[0].abs();
         }
-
-        self.cells = next;
-
-        //   log!("{}", timer.name);
-    }
-}
-
-impl Universe {
-    /// Get the dead and alive values of the entire universe.
-    pub fn get_cells(&self) -> &[Cell] {
-        &self.cells
-    }
-
-    /// Set cells to be alive in a universe by passing the row and column
-    /// of each cell as an array.
-    pub fn set_cells(&mut self, cells: &[(usize, usize)]) {
-        for (row, col) in cells.iter().cloned() {
-            let idx = self.get_index(row, col);
-            self.cells[idx] = Cell::Alive;
+        if self.0[1].abs() > 1 {
+            self.0[1] /= self.0[1].abs();
         }
     }
 }
 
-use std::{cell::RefCell, fmt, rc::Rc, time::Duration};
+struct LongRope([Coords; 10]);
 
-impl fmt::Display for Universe {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for line in self.cells.as_slice().chunks(self.width as usize) {
-            for &cell in line {
-                let symbol = if cell == Cell::Dead { '◻' } else { '◼' };
-                write!(f, "{}", symbol)?;
-            }
-            write!(f, "\n")?;
+impl LongRope {
+    fn mov(&mut self, mov: Coords) {
+        self.0[0].mov(&mov);
+
+        for l in 0..(self.0.len() - 1) {
+            let mut diff = self.0[l].diff(&self.0[l + 1]);
+            diff.normalize();
+            self.0[l + 1].mov(&diff);
         }
+    }
 
-        Ok(())
+    fn draw(&self, img_data: &mut Vec<u8>) {
+        let size = (img_data.len() as f32 / 4 as f32).sqrt() as usize;
+
+        let lim = img_data.len();
+
+        for (i, point) in self.0.iter().enumerate() {
+            let ind = point.0[0] as usize + size * point.0[1] as usize;
+
+            img_data[(4 * ind) % lim as usize] = 0;
+            img_data[(4 * ind + 1) % lim as usize] = 0;
+            img_data[(4 * ind + 2) % lim as usize] = 0;
+
+            img_data[(4 * ind + 4) % lim as usize] = 0;
+            img_data[(4 * ind + 5) % lim as usize] = 0;
+            img_data[(4 * ind + 6) % lim as usize] = 0;
+
+            img_data[(4 * ind + 4 * size) % lim as usize] = 0;
+            img_data[(4 * ind + 1 + 4 * size) % lim as usize] = 0;
+            img_data[(4 * ind + 2 + 4 * size) % lim as usize] = 0;
+
+            img_data[(4 * ind + 4 + 4 * size) % lim as usize] = 0;
+            img_data[(4 * ind + 5 + 4 * size) % lim as usize] = 0;
+            img_data[(4 * ind + 6 + 4 * size) % lim as usize] = 0;
+        }
     }
 }
 
-impl Universe {
-    pub fn draw(&self, ctx: &web_sys::CanvasRenderingContext2d) -> Result<(), JsValue> {
-        let img = web_sys::ImageData::new_with_sw(self.width(), self.height())?;
+struct Trail(Vec<Coords>);
 
-        let mut data = Vec::<u8>::with_capacity(self.width * self.height);
+impl Trail {
+    fn draw(&self, img_data: &mut Vec<u8>) {
+        let size = (img_data.len() as f32 / 4 as f32).sqrt() as usize;
+        let lim = img_data.len();
 
-        for idx in 0..self.width * self.height {
-            let cell = self.cells[idx as usize];
+        for (i, point) in self.0.iter().enumerate() {
+            let ind = point.0[0] as usize + size * point.0[1] as usize;
 
-            let color = match cell {
-                Cell::Dead => 255,
-                Cell::Alive => 0,
-            };
+            img_data[4 * ind % lim as usize] = 128;
+            img_data[(4 * ind + 1) % lim as usize] = 128;
+            img_data[(4 * ind + 2) % lim as usize] = 128;
 
-            data.push(color);
-            data.push(color);
-            data.push(color);
-            data.push(255);
+            img_data[(4 * ind + 4) % lim as usize] = 128;
+            img_data[(4 * ind + 5) % lim as usize] = 128;
+            img_data[(4 * ind + 6) % lim as usize] = 128;
+
+            img_data[(4 * ind + 4 * size) % lim as usize] = 128;
+            img_data[(4 * ind + 1 + 4 * size) % lim as usize] = 128;
+            img_data[(4 * ind + 2 + 4 * size) % lim as usize] = 128;
+
+            img_data[(4 * ind + 4 + 4 * size) % lim as usize] = 128;
+            img_data[(4 * ind + 5 + 4 * size) % lim as usize] = 128;
+            img_data[(4 * ind + 6 + 4 * size) % lim as usize] = 128;
         }
-
-        let img = web_sys::ImageData::new_with_u8_clamped_array_and_sh(
-            wasm_bindgen::Clamped(&mut data),
-            self.width(),
-            self.height(),
-        )?;
-
-        ctx.put_image_data(&img, 0.into(), 0.into())?;
-
-        Ok(())
     }
 }
 
-fn draw_timer(
-    ctx: &CanvasRenderingContext2d,
-    dur: &Duration,
-    w: &u32,
-    h: &u32,
-) -> Result<(), JsValue> {
-    let txt = format!("{}ms", dur.as_millis());
-
-    let metrics = ctx.measure_text(&txt)?;
-
-    let w = f64::from(*w) - metrics.width();
-    let h = f64::from(*h) - metrics.actual_bounding_box_descent();
-
-    ctx.fill_text(&txt, w, h)?;
-
-    Ok(())
+fn up(input: &str) -> IResult<&str, Vec<Coords>> {
+    let (input, (_, times)) = separated_pair(tag("U"), tag(" "), complete::i32)(input)?;
+    Ok((input, (0..times).map(|_| Coords([0, 1])).collect()))
 }
+
+fn down(input: &str) -> IResult<&str, Vec<Coords>> {
+    let (input, (_, times)) = separated_pair(tag("D"), tag(" "), complete::i32)(input)?;
+    Ok((input, (0..times).map(|_| Coords([0, -1])).collect()))
+}
+
+fn left(input: &str) -> IResult<&str, Vec<Coords>> {
+    let (input, (_, times)) = separated_pair(tag("L"), tag(" "), complete::i32)(input)?;
+    Ok((input, (0..times).map(|_| Coords([-1, 0])).collect()))
+}
+
+fn right(input: &str) -> IResult<&str, Vec<Coords>> {
+    let (input, (_, times)) = separated_pair(tag("R"), tag(" "), complete::i32)(input)?;
+    Ok((input, (0..times).map(|_| Coords([1, 0])).collect()))
+}
+
+fn moves(input: &str) -> IResult<&str, Vec<Coords>> {
+    let (input, moves) = separated_list0(newline, alt((up, down, right, left)))(input)?;
+    Ok((input, moves.into_iter().flatten().collect()))
+}
+
 #[wasm_bindgen(start)]
 pub fn run() -> Result<(), JsValue> {
     // Use `web_sys`'s global `window` function to get a handle on the global
@@ -274,29 +152,9 @@ pub fn run() -> Result<(), JsValue> {
 
     // Manufacture the element we're gonna append
     let canvas = document
-        .create_element("canvas")?
+        .get_element_by_id("rope-canvas")
+        .expect("canvas not found")
         .dyn_into::<web_sys::HtmlCanvasElement>()?;
-
-    canvas
-        .style()
-        .set_property("image-rendering", "pixelated")?;
-    canvas
-        .style()
-        .set_property("image-rendering", "crisp-edges")?;
-
-    body.append_child(&canvas)?;
-
-    fn request_animation_frame(f: &Closure<dyn FnMut()>) {
-        web_sys::window()
-            .expect("no global window")
-            .request_animation_frame(f.as_ref().unchecked_ref())
-            .expect("should register `requestAnimationFrame` OK");
-    }
-
-    let mut universe = Universe::new(512, 512);
-
-    canvas.set_height(universe.height as u32);
-    canvas.set_width(universe.width as u32);
 
     let context = canvas
         .get_context("2d")
@@ -305,32 +163,83 @@ pub fn run() -> Result<(), JsValue> {
         .dyn_into::<web_sys::CanvasRenderingContext2d>()
         .unwrap();
 
-    context.set_font("16px VT323");
-    context.set_image_smoothing_enabled(false);
+    fn request_animation_frame(f: &Closure<dyn FnMut()>) {
+        web_sys::window()
+            .expect("no global window")
+            .request_animation_frame(f.as_ref().unchecked_ref())
+            .expect("should register `requestAnimationFrame` OK");
+    }
 
     let f = Rc::new(RefCell::new(Option::None));
     let g = f.clone();
+
+    let input = document
+        .get_element_by_id("input-moves")
+        .expect("textarea not found")
+        .dyn_into::<web_sys::HtmlTextAreaElement>()?;
+
+    let input = input.value();
+
+    let start_button = document
+        .get_element_by_id("start-button")
+        .expect("button not found")
+        .dyn_into::<web_sys::HtmlButtonElement>()?;
+
+    let start = Closure::wrap(Box::new(move || {
+        log!("pressed");
+    }) as Box<dyn FnMut()>);
+
+    start_button.set_onclick(Some(start.as_ref().unchecked_ref()));
+
+    start.forget();
+
+    let (_, mut moves) = moves(&input).unwrap();
+
+    let size = 512 as usize;
+
+    let mut rope = LongRope([Coords([(size / 2) as i32, (size / 2) as i32]); 10]);
+    let mut trail = Trail(Vec::<Coords>::new());
+
     *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
-        let now = instant::Instant::now();
+        let next_move = moves.pop().unwrap();
 
-        universe.tick();
-        universe.draw(&context).expect("failed to draw universe");
+        rope.mov(next_move);
 
-        let elapsed_time = now.elapsed();
+        trail.0.push(rope.0[9]);
 
-        draw_timer(
-            &context,
-            &elapsed_time,
-            &universe.width(),
-            &universe.height(),
+        let img = web_sys::ImageData::new_with_sw(size as u32, size as u32)
+            .expect("failed to create image data");
+
+        //let mut data = (0..(size * size)).map(|_| 255).collect::<Vec<u8>>();
+
+        let mut data = Vec::<u8>::new();
+
+        for _ in 0..(size * size) {
+            data.push(255);
+            data.push(255);
+            data.push(255);
+            data.push(255);
+        }
+
+        rope.draw(&mut data);
+
+        trail.draw(&mut data);
+
+        let img = web_sys::ImageData::new_with_u8_clamped_array_and_sh(
+            wasm_bindgen::Clamped(&mut data),
+            size as u32,
+            size as u32,
         )
-        .expect("failed to draw timer");
+        .expect("failed to create image from data");
+
+        context
+            .put_image_data(&img, 0.into(), 0.into())
+            .expect("failed to update canvas");
 
         // Schedule ourself for another requestAnimationFrame callback.
         request_animation_frame(f.borrow().as_ref().unwrap());
     }) as Box<dyn FnMut()>));
 
     request_animation_frame(g.borrow().as_ref().unwrap());
-
     Ok(())
 }

@@ -13,12 +13,13 @@ default = ["console_error_panic_hook"]
 
 [dependencies]
 wasm-bindgen = "0.2.83"
-web-sys = { version = "0.3.60", features = ["console", 'CanvasRenderingContext2d','CssStyleDeclaration','ImageData','TextMetrics', 'Document','Element','HtmlCanvasElement','Window',]}
+web-sys = { version = "0.3.60", features = ["console", 'CanvasRenderingContext2d','CssStyleDeclaration','ImageData','TextMetrics', 'Document','Element','HtmlCanvasElement','HtmlTextAreaElement','HtmlButtonElement','Window',]}
 js-sys = "0.3.60"
 console_error_panic_hook = { version = "0.1.7", optional = true }
 getrandom = { version = "0.2.7", features = ["js"] }
 rand = { version = "0.8.5"}
 instant = {version="0.1", features = [ "wasm-bindgen" ] }
+nom = "7.1.1"
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.33"
