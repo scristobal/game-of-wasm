@@ -1,26 +1,19 @@
-#![allow(unused_variables)]
-#![allow(dead_code)]
-
 extern crate console_error_panic_hook;
 mod utils;
 
-use instant;
-use rand;
 use utils::log;
 use wasm_bindgen::{prelude::*, JsCast};
-use web_sys::CanvasRenderingContext2d;
 
-use std::cell::RefCell;
-use std::collections::HashSet;
-use std::fmt::{self, Debug};
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
-use nom::branch::alt;
-use nom::character::complete;
-use nom::character::complete::newline;
-use nom::sequence::separated_pair;
-use nom::{bytes::complete::tag, multi::separated_list0, IResult};
-use std::include_str;
+use nom::{
+    branch::alt,
+    bytes::complete::tag,
+    character::complete::{self, newline},
+    multi::separated_list0,
+    sequence::separated_pair,
+    IResult,
+};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 struct Coords([i32; 2]);
@@ -62,29 +55,7 @@ impl LongRope {
     }
 
     fn draw(&self, img_data: &mut Vec<u8>) {
-        let size = (img_data.len() as f32 / 4 as f32).sqrt() as usize;
-
-        let lim = img_data.len();
-
-        for (i, point) in self.0.iter().enumerate() {
-            let ind = point.0[0] as usize + size * point.0[1] as usize;
-
-            img_data[(4 * ind) % lim as usize] = 0;
-            img_data[(4 * ind + 1) % lim as usize] = 0;
-            img_data[(4 * ind + 2) % lim as usize] = 0;
-
-            img_data[(4 * ind + 4) % lim as usize] = 0;
-            img_data[(4 * ind + 5) % lim as usize] = 0;
-            img_data[(4 * ind + 6) % lim as usize] = 0;
-
-            img_data[(4 * ind + 4 * size) % lim as usize] = 0;
-            img_data[(4 * ind + 1 + 4 * size) % lim as usize] = 0;
-            img_data[(4 * ind + 2 + 4 * size) % lim as usize] = 0;
-
-            img_data[(4 * ind + 4 + 4 * size) % lim as usize] = 0;
-            img_data[(4 * ind + 5 + 4 * size) % lim as usize] = 0;
-            img_data[(4 * ind + 6 + 4 * size) % lim as usize] = 0;
-        }
+        copy_vec_on_matrix_x4(&self.0.iter().copied().collect(), img_data);
     }
 }
 
@@ -92,28 +63,32 @@ struct Trail(Vec<Coords>);
 
 impl Trail {
     fn draw(&self, img_data: &mut Vec<u8>) {
-        let size = (img_data.len() as f32 / 4 as f32).sqrt() as usize;
-        let lim = img_data.len();
+        copy_vec_on_matrix_x4(&self.0.iter().copied().collect(), img_data);
+    }
+}
 
-        for (i, point) in self.0.iter().enumerate() {
-            let ind = point.0[0] as usize + size * point.0[1] as usize;
+fn copy_vec_on_matrix_x4(source: &Vec<Coords>, dest: &mut Vec<u8>) {
+    let size = (dest.len() as f32 / 4 as f32).sqrt() as usize;
+    let lim = dest.len();
 
-            img_data[4 * ind % lim as usize] = 128;
-            img_data[(4 * ind + 1) % lim as usize] = 128;
-            img_data[(4 * ind + 2) % lim as usize] = 128;
+    for point in source.iter() {
+        let ind = point.0[0] as usize + size * point.0[1] as usize;
 
-            img_data[(4 * ind + 4) % lim as usize] = 128;
-            img_data[(4 * ind + 5) % lim as usize] = 128;
-            img_data[(4 * ind + 6) % lim as usize] = 128;
+        dest[4 * ind % lim as usize] = 128;
+        dest[(4 * ind + 1) % lim as usize] = 128;
+        dest[(4 * ind + 2) % lim as usize] = 128;
 
-            img_data[(4 * ind + 4 * size) % lim as usize] = 128;
-            img_data[(4 * ind + 1 + 4 * size) % lim as usize] = 128;
-            img_data[(4 * ind + 2 + 4 * size) % lim as usize] = 128;
+        dest[(4 * ind + 4) % lim as usize] = 128;
+        dest[(4 * ind + 5) % lim as usize] = 128;
+        dest[(4 * ind + 6) % lim as usize] = 128;
 
-            img_data[(4 * ind + 4 + 4 * size) % lim as usize] = 128;
-            img_data[(4 * ind + 5 + 4 * size) % lim as usize] = 128;
-            img_data[(4 * ind + 6 + 4 * size) % lim as usize] = 128;
-        }
+        dest[(4 * ind + 4 * size) % lim as usize] = 128;
+        dest[(4 * ind + 1 + 4 * size) % lim as usize] = 128;
+        dest[(4 * ind + 2 + 4 * size) % lim as usize] = 128;
+
+        dest[(4 * ind + 4 + 4 * size) % lim as usize] = 128;
+        dest[(4 * ind + 5 + 4 * size) % lim as usize] = 128;
+        dest[(4 * ind + 6 + 4 * size) % lim as usize] = 128;
     }
 }
 
@@ -144,13 +119,9 @@ fn moves(input: &str) -> IResult<&str, Vec<Coords>> {
 
 #[wasm_bindgen(start)]
 pub fn run() -> Result<(), JsValue> {
-    // Use `web_sys`'s global `window` function to get a handle on the global
-    // window object.
     let window = web_sys::window().expect("no global `window` exists");
     let document = window.document().expect("should have a document on window");
-    let body = document.body().expect("document should have a body");
 
-    // Manufacture the element we're gonna append
     let canvas = document
         .get_element_by_id("rope-canvas")
         .expect("canvas not found")
@@ -206,9 +177,6 @@ pub fn run() -> Result<(), JsValue> {
         rope.mov(next_move);
 
         trail.0.push(rope.0[9]);
-
-        let img = web_sys::ImageData::new_with_sw(size as u32, size as u32)
-            .expect("failed to create image data");
 
         //let mut data = (0..(size * size)).map(|_| 255).collect::<Vec<u8>>();
 
