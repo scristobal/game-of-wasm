@@ -118,14 +118,35 @@ fn moves(input: &str) -> IResult<&str, Vec<Coords>> {
 }
 
 #[wasm_bindgen(start)]
-pub fn run() -> Result<(), JsValue> {
+pub fn main() -> Result<(), JsValue> {
+    let window = web_sys::window().expect("no global `window` exists");
+    let document = window.document().expect("should have a document on window");
+
+    let start_button = document
+        .get_element_by_id("start-button")
+        .expect("button not found")
+        .dyn_into::<web_sys::HtmlButtonElement>()?;
+
+    let start = Closure::wrap(Box::new(move || {
+        run();
+    }) as Box<dyn FnMut()>);
+
+    start_button.set_onclick(Some(start.as_ref().unchecked_ref()));
+
+    start.forget();
+
+    Ok(())
+}
+
+fn run() {
     let window = web_sys::window().expect("no global `window` exists");
     let document = window.document().expect("should have a document on window");
 
     let canvas = document
         .get_element_by_id("rope-canvas")
         .expect("canvas not found")
-        .dyn_into::<web_sys::HtmlCanvasElement>()?;
+        .dyn_into::<web_sys::HtmlCanvasElement>()
+        .unwrap();
 
     let context = canvas
         .get_context("2d")
@@ -147,22 +168,10 @@ pub fn run() -> Result<(), JsValue> {
     let input = document
         .get_element_by_id("input-moves")
         .expect("textarea not found")
-        .dyn_into::<web_sys::HtmlTextAreaElement>()?;
+        .dyn_into::<web_sys::HtmlTextAreaElement>()
+        .unwrap();
 
     let input = input.value();
-
-    let start_button = document
-        .get_element_by_id("start-button")
-        .expect("button not found")
-        .dyn_into::<web_sys::HtmlButtonElement>()?;
-
-    let start = Closure::wrap(Box::new(move || {
-        log!("pressed");
-    }) as Box<dyn FnMut()>);
-
-    start_button.set_onclick(Some(start.as_ref().unchecked_ref()));
-
-    start.forget();
 
     let (_, mut moves) = moves(&input).unwrap();
 
@@ -209,5 +218,4 @@ pub fn run() -> Result<(), JsValue> {
     }) as Box<dyn FnMut()>));
 
     request_animation_frame(g.borrow().as_ref().unwrap());
-    Ok(())
 }
