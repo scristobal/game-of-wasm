@@ -1,0 +1,12 @@
+{
+  "name": "glife-wasm",
+  "version": "0.6.0",
+  "files": [
+    "glife_wasm_bg.wasm",
+    "glife_wasm.js",
+    "glife_wasm.d.ts"
+  ],
+  "module": "glife_wasm.js",
+  "types": "glife_wasm.d.ts",
+  "sideEffects": false
+}
