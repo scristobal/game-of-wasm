@@ -118,7 +118,7 @@ fn moves(input: &str) -> IResult<&str, Vec<Coords>> {
 }
 
 #[wasm_bindgen(start)]
-pub fn main() -> Result<(), JsValue> {
+pub fn run() -> Result<(), JsValue> {
     let window = web_sys::window().expect("no global `window` exists");
     let document = window.document().expect("should have a document on window");
 
@@ -128,7 +128,7 @@ pub fn main() -> Result<(), JsValue> {
         .dyn_into::<web_sys::HtmlButtonElement>()?;
 
     let start = Closure::wrap(Box::new(move || {
-        run();
+        simulate();
     }) as Box<dyn FnMut()>);
 
     start_button.set_onclick(Some(start.as_ref().unchecked_ref()));
@@ -138,7 +138,7 @@ pub fn main() -> Result<(), JsValue> {
     Ok(())
 }
 
-fn run() {
+fn simulate() {
     let window = web_sys::window().expect("no global `window` exists");
     let document = window.document().expect("should have a document on window");
 
@@ -215,6 +215,28 @@ fn run() {
 
         // Schedule ourself for another requestAnimationFrame callback.
         request_animation_frame(f.borrow().as_ref().unwrap());
+        /*
+        let window = web_sys::window().expect("no global `window` exists");
+        let document = window.document().expect("should have a document on window");
+
+        let start_button = document
+            .get_element_by_id("start-button")
+            .expect("button not found")
+            .dyn_into::<web_sys::HtmlButtonElement>()
+            .unwrap();
+
+        start_button.set_disabled(true);
+
+        let stop = Closure::wrap(Box::new(move || {
+            web_sys::window()
+                .expect("no global window")
+                .cancel_animation_frame(cancel)
+                .unwrap();
+        }) as Box<dyn FnMut()>);
+
+        start_button.set_onclick(Some(stop.as_ref().unchecked_ref()));
+
+        stop.forget();*/
     }) as Box<dyn FnMut()>));
 
     request_animation_frame(g.borrow().as_ref().unwrap());

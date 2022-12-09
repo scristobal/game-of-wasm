@@ -206,8 +206,8 @@ function __wbg_adapter_16(arg0, arg1) {
 
 /**
 */
-export function main() {
-    wasm.main();
+export function run() {
+    wasm.run();
 }
 
 function isLikeNone(x) {
