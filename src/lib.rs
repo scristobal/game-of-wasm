@@ -55,7 +55,7 @@ impl LongRope {
     }
 
     fn draw(&self, img_data: &mut Vec<u8>) {
-        copy_vec_on_matrix_x4(&self.0.iter().copied().collect(), img_data);
+        copy_vec_on_matrix_x4(&self.0.iter().copied().collect(), img_data, 0);
     }
 }
 
@@ -63,32 +63,32 @@ struct Trail(Vec<Coords>);
 
 impl Trail {
     fn draw(&self, img_data: &mut Vec<u8>) {
-        copy_vec_on_matrix_x4(&self.0.iter().copied().collect(), img_data);
+        copy_vec_on_matrix_x4(&self.0.iter().copied().collect(), img_data, 128);
     }
 }
 
-fn copy_vec_on_matrix_x4(source: &Vec<Coords>, dest: &mut Vec<u8>) {
+fn copy_vec_on_matrix_x4(source: &Vec<Coords>, dest: &mut Vec<u8>, color: u8) {
     let size = (dest.len() as f32 / 4 as f32).sqrt() as usize;
     let lim = dest.len();
 
     for point in source.iter() {
         let ind = point.0[0] as usize + size * point.0[1] as usize;
 
-        dest[4 * ind % lim as usize] = 128;
-        dest[(4 * ind + 1) % lim as usize] = 128;
-        dest[(4 * ind + 2) % lim as usize] = 128;
+        dest[4 * ind % lim as usize] = color;
+        dest[(4 * ind + 1) % lim as usize] = color;
+        dest[(4 * ind + 2) % lim as usize] = color;
 
-        dest[(4 * ind + 4) % lim as usize] = 128;
-        dest[(4 * ind + 5) % lim as usize] = 128;
-        dest[(4 * ind + 6) % lim as usize] = 128;
+        dest[(4 * ind + 4) % lim as usize] = color;
+        dest[(4 * ind + 5) % lim as usize] = color;
+        dest[(4 * ind + 6) % lim as usize] = color;
 
-        dest[(4 * ind + 4 * size) % lim as usize] = 128;
-        dest[(4 * ind + 1 + 4 * size) % lim as usize] = 128;
-        dest[(4 * ind + 2 + 4 * size) % lim as usize] = 128;
+        dest[(4 * ind + 4 * size) % lim as usize] = color;
+        dest[(4 * ind + 1 + 4 * size) % lim as usize] = color;
+        dest[(4 * ind + 2 + 4 * size) % lim as usize] = color;
 
-        dest[(4 * ind + 4 + 4 * size) % lim as usize] = 128;
-        dest[(4 * ind + 5 + 4 * size) % lim as usize] = 128;
-        dest[(4 * ind + 6 + 4 * size) % lim as usize] = 128;
+        dest[(4 * ind + 4 + 4 * size) % lim as usize] = color;
+        dest[(4 * ind + 5 + 4 * size) % lim as usize] = color;
+        dest[(4 * ind + 6 + 4 * size) % lim as usize] = color;
     }
 }
 
