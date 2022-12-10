@@ -1,7 +1,6 @@
 extern crate console_error_panic_hook;
 mod utils;
 
-use utils::log;
 use wasm_bindgen::{prelude::*, JsCast};
 
 use std::{cell::RefCell, rc::Rc};
@@ -55,7 +54,7 @@ impl LongRope {
     }
 
     fn draw(&self, img_data: &mut Vec<u8>) {
-        copy_vec_on_matrix_x4(&self.0.iter().copied().collect(), img_data, 0);
+        copy_vec_on_matrix_x4(&self.0, img_data, 0);
     }
 }
 
@@ -63,12 +62,12 @@ struct Trail(Vec<Coords>);
 
 impl Trail {
     fn draw(&self, img_data: &mut Vec<u8>) {
-        copy_vec_on_matrix_x4(&self.0.iter().copied().collect(), img_data, 128);
+        copy_vec_on_matrix_x4(&self.0, img_data, 128);
     }
 }
 
-fn copy_vec_on_matrix_x4(source: &Vec<Coords>, dest: &mut Vec<u8>, color: u8) {
-    let size = (dest.len() as f32 / 4 as f32).sqrt() as usize;
+fn copy_vec_on_matrix_x4(source: &[Coords], dest: &mut Vec<u8>, color: u8) {
+    let size = (dest.len() as f32 / 4_f32).sqrt() as usize;
     let lim = dest.len();
 
     for point in source.iter() {
@@ -181,7 +180,7 @@ fn simulate() {
 
     moves.reverse();
 
-    let size = 512 as usize;
+    let size = 512_usize;
 
     let mut rope = LongRope([Coords([(size / 2) as i32, (size / 2) as i32]); 10]);
     let mut trail = Trail(Vec::<Coords>::new());
@@ -201,7 +200,7 @@ fn simulate() {
 
         trail.draw(&mut data);
 
-        let mut inv_data = data
+        let inv_data = data
             .chunks(4 * size)
             .rev()
             .flatten()
@@ -209,7 +208,7 @@ fn simulate() {
             .collect::<Vec<_>>();
 
         let img = web_sys::ImageData::new_with_u8_clamped_array_and_sh(
-            wasm_bindgen::Clamped(&mut inv_data),
+            wasm_bindgen::Clamped(&inv_data),
             size as u32,
             size as u32,
         )
