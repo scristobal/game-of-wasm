@@ -60,3 +60,10 @@ You need to build the Rust project first and then bring it into the sample websi
 ### 🕸️ Upload to the Web
 
 Nothing to do, Vercel deploys `main` branch automatically.
+
+## Update
+
+without `wasm-pack` in two steps:
+
+- compile to wasm `cargo build --target=wasm32-unknown-unknown --release`
+- create JS/TS `wasm-bindgen ./target/wasm32-unknown-unknown/release/glife_wasm.wasm --out-dir ./wasm-bindgen-out`
