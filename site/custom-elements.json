@@ -1,0 +1,996 @@
+{
+  "schemaVersion": "1.0.0",
+  "readme": "",
+  "modules": [
+    {
+      "kind": "javascript-module",
+      "path": "index.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "GameOfLife",
+          "members": [
+            {
+              "kind": "field",
+              "name": "width"
+            },
+            {
+              "kind": "field",
+              "name": "height"
+            },
+            {
+              "kind": "field",
+              "name": "universe"
+            },
+            {
+              "kind": "field",
+              "name": "memory",
+              "default": "memory"
+            },
+            {
+              "kind": "field",
+              "name": "canvas"
+            },
+            {
+              "kind": "field",
+              "name": "ctx",
+              "default": "this.canvas.getContext('2d')!"
+            },
+            {
+              "kind": "field",
+              "name": "tickTimer",
+              "default": "new TickTimer()"
+            },
+            {
+              "kind": "method",
+              "name": "#mouseMoveHandler",
+              "parameters": [
+                {
+                  "name": "event",
+                  "type": {
+                    "text": "MouseEvent"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "#rescale",
+              "parameters": [
+                {
+                  "name": "height",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "width",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "#drawCells"
+            },
+            {
+              "kind": "method",
+              "name": "#renderLoop"
+            },
+            {
+              "kind": "field",
+              "name": "textContent",
+              "default": "`@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');`"
+            },
+            {
+              "kind": "field",
+              "name": "font",
+              "type": {
+                "text": "string"
+              },
+              "default": "'14px VT323'"
+            },
+            {
+              "kind": "field",
+              "name": "imageSmoothingEnabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "adoptedStyleSheets",
+              "type": {
+                "text": "array"
+              },
+              "default": "[style]"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "width"
+            },
+            {
+              "name": "height"
+            }
+          ],
+          "superclass": {
+            "name": "HTMLElement"
+          },
+          "tagName": "game-of-life",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "custom-element-definition",
+          "name": "game-of-life",
+          "declaration": {
+            "name": "GameOfLife",
+            "module": "index.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "bin/glife_wasm.js",
+      "declarations": [],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "*",
+          "declaration": {
+            "name": "*",
+            "package": "\"./glife_wasm_bg.js\""
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "bin/glife_wasm_bg.js",
+      "declarations": [
+        {
+          "kind": "function",
+          "name": "__wbg_set_wasm",
+          "parameters": [
+            {
+              "name": "val"
+            }
+          ]
+        },
+        {
+          "kind": "variable",
+          "name": "Cell"
+        },
+        {
+          "kind": "class",
+          "description": "",
+          "name": "Universe",
+          "members": [
+            {
+              "kind": "method",
+              "name": "__wrap",
+              "static": true,
+              "parameters": [
+                {
+                  "name": "ptr"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "__destroy_into_raw"
+            },
+            {
+              "kind": "method",
+              "name": "free"
+            },
+            {
+              "kind": "method",
+              "name": "toggle_cell",
+              "parameters": [
+                {
+                  "name": "row",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "col",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "new",
+              "static": true,
+              "parameters": [
+                {
+                  "name": "width",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "height",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ],
+              "return": {
+                "type": {
+                  "text": "Universe"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "width",
+              "return": {
+                "type": {
+                  "text": "number"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "set_width",
+              "parameters": [
+                {
+                  "name": "width",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ],
+              "description": "Set the width of the universe.\n\nResets all cells to the dead state."
+            },
+            {
+              "kind": "method",
+              "name": "height",
+              "return": {
+                "type": {
+                  "text": "number"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "set_height",
+              "parameters": [
+                {
+                  "name": "height",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ],
+              "description": "Set the height of the universe.\n\nResets all cells to the dead state."
+            },
+            {
+              "kind": "method",
+              "name": "cells",
+              "return": {
+                "type": {
+                  "text": "number"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "render",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "tick"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbindgen_string_new",
+          "parameters": [
+            {
+              "name": "arg0"
+            },
+            {
+              "name": "arg1"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbindgen_object_drop_ref",
+          "parameters": [
+            {
+              "name": "arg0"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_randomFillSync_065afffde01daa66"
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_getRandomValues_b99eec4244a475bb"
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_process_0cc2ada8524d6f83",
+          "parameters": [
+            {
+              "name": "arg0"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbindgen_is_object",
+          "parameters": [
+            {
+              "name": "arg0"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_versions_c11acceab27a6c87",
+          "parameters": [
+            {
+              "name": "arg0"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_node_7ff1ce49caf23815",
+          "parameters": [
+            {
+              "name": "arg0"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbindgen_is_string",
+          "parameters": [
+            {
+              "name": "arg0"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_crypto_2036bed7c44c25e7",
+          "parameters": [
+            {
+              "name": "arg0"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_msCrypto_a21fc88caf1ecdc8",
+          "parameters": [
+            {
+              "name": "arg0"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_static_accessor_NODE_MODULE_cf6401cc1091279e"
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_require_a746e79b322b9336"
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_log_4b5638ad60bdc54a",
+          "parameters": [
+            {
+              "name": "arg0"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_newnoargs_b5b063fc6c2f0376",
+          "parameters": [
+            {
+              "name": "arg0"
+            },
+            {
+              "name": "arg1"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_call_97ae9d8645dc388b"
+        },
+        {
+          "kind": "function",
+          "name": "__wbindgen_object_clone_ref",
+          "parameters": [
+            {
+              "name": "arg0"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_self_6d479506f72c6a71"
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_window_f2557cc78490aceb"
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_globalThis_7f206bda628d5286"
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_global_ba75c50d1cf384f4"
+        },
+        {
+          "kind": "function",
+          "name": "__wbindgen_is_undefined",
+          "parameters": [
+            {
+              "name": "arg0"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_buffer_3f3d764d4747d564",
+          "parameters": [
+            {
+              "name": "arg0"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_new_8c3f0052272a457a",
+          "parameters": [
+            {
+              "name": "arg0"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_set_83db9690f9353e79",
+          "parameters": [
+            {
+              "name": "arg0"
+            },
+            {
+              "name": "arg1"
+            },
+            {
+              "name": "arg2"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_length_9e1ae1900cb0fbd5",
+          "parameters": [
+            {
+              "name": "arg0"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_newwithlength_f5933855e4f48a19",
+          "parameters": [
+            {
+              "name": "arg0"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_subarray_58ad4efbb5bcb886",
+          "parameters": [
+            {
+              "name": "arg0"
+            },
+            {
+              "name": "arg1"
+            },
+            {
+              "name": "arg2"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_new_abda76e883ba8a5f"
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_stack_658279fe44541cf6",
+          "parameters": [
+            {
+              "name": "arg0"
+            },
+            {
+              "name": "arg1"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_error_f851667af71bcfc6",
+          "parameters": [
+            {
+              "name": "arg0"
+            },
+            {
+              "name": "arg1"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbindgen_throw",
+          "parameters": [
+            {
+              "name": "arg0"
+            },
+            {
+              "name": "arg1"
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "__wbindgen_memory"
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "__wbg_set_wasm",
+          "declaration": {
+            "name": "__wbg_set_wasm",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "Cell",
+          "declaration": {
+            "name": "Cell",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "Universe",
+          "declaration": {
+            "name": "Universe",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbindgen_string_new",
+          "declaration": {
+            "name": "__wbindgen_string_new",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbindgen_object_drop_ref",
+          "declaration": {
+            "name": "__wbindgen_object_drop_ref",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_randomFillSync_065afffde01daa66",
+          "declaration": {
+            "name": "__wbg_randomFillSync_065afffde01daa66",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_getRandomValues_b99eec4244a475bb",
+          "declaration": {
+            "name": "__wbg_getRandomValues_b99eec4244a475bb",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_process_0cc2ada8524d6f83",
+          "declaration": {
+            "name": "__wbg_process_0cc2ada8524d6f83",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbindgen_is_object",
+          "declaration": {
+            "name": "__wbindgen_is_object",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_versions_c11acceab27a6c87",
+          "declaration": {
+            "name": "__wbg_versions_c11acceab27a6c87",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_node_7ff1ce49caf23815",
+          "declaration": {
+            "name": "__wbg_node_7ff1ce49caf23815",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbindgen_is_string",
+          "declaration": {
+            "name": "__wbindgen_is_string",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_crypto_2036bed7c44c25e7",
+          "declaration": {
+            "name": "__wbg_crypto_2036bed7c44c25e7",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_msCrypto_a21fc88caf1ecdc8",
+          "declaration": {
+            "name": "__wbg_msCrypto_a21fc88caf1ecdc8",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_static_accessor_NODE_MODULE_cf6401cc1091279e",
+          "declaration": {
+            "name": "__wbg_static_accessor_NODE_MODULE_cf6401cc1091279e",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_require_a746e79b322b9336",
+          "declaration": {
+            "name": "__wbg_require_a746e79b322b9336",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_log_4b5638ad60bdc54a",
+          "declaration": {
+            "name": "__wbg_log_4b5638ad60bdc54a",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_newnoargs_b5b063fc6c2f0376",
+          "declaration": {
+            "name": "__wbg_newnoargs_b5b063fc6c2f0376",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_call_97ae9d8645dc388b",
+          "declaration": {
+            "name": "__wbg_call_97ae9d8645dc388b",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbindgen_object_clone_ref",
+          "declaration": {
+            "name": "__wbindgen_object_clone_ref",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_self_6d479506f72c6a71",
+          "declaration": {
+            "name": "__wbg_self_6d479506f72c6a71",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_window_f2557cc78490aceb",
+          "declaration": {
+            "name": "__wbg_window_f2557cc78490aceb",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_globalThis_7f206bda628d5286",
+          "declaration": {
+            "name": "__wbg_globalThis_7f206bda628d5286",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_global_ba75c50d1cf384f4",
+          "declaration": {
+            "name": "__wbg_global_ba75c50d1cf384f4",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbindgen_is_undefined",
+          "declaration": {
+            "name": "__wbindgen_is_undefined",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_buffer_3f3d764d4747d564",
+          "declaration": {
+            "name": "__wbg_buffer_3f3d764d4747d564",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_new_8c3f0052272a457a",
+          "declaration": {
+            "name": "__wbg_new_8c3f0052272a457a",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_set_83db9690f9353e79",
+          "declaration": {
+            "name": "__wbg_set_83db9690f9353e79",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_length_9e1ae1900cb0fbd5",
+          "declaration": {
+            "name": "__wbg_length_9e1ae1900cb0fbd5",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_newwithlength_f5933855e4f48a19",
+          "declaration": {
+            "name": "__wbg_newwithlength_f5933855e4f48a19",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_subarray_58ad4efbb5bcb886",
+          "declaration": {
+            "name": "__wbg_subarray_58ad4efbb5bcb886",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_new_abda76e883ba8a5f",
+          "declaration": {
+            "name": "__wbg_new_abda76e883ba8a5f",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_stack_658279fe44541cf6",
+          "declaration": {
+            "name": "__wbg_stack_658279fe44541cf6",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_error_f851667af71bcfc6",
+          "declaration": {
+            "name": "__wbg_error_f851667af71bcfc6",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbindgen_throw",
+          "declaration": {
+            "name": "__wbindgen_throw",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbindgen_memory",
+          "declaration": {
+            "name": "__wbindgen_memory",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "dist/index.js",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "c",
+          "members": [
+            {
+              "kind": "field",
+              "name": "width"
+            },
+            {
+              "kind": "field",
+              "name": "height"
+            },
+            {
+              "kind": "field",
+              "name": "universe"
+            },
+            {
+              "kind": "field",
+              "name": "memory"
+            },
+            {
+              "kind": "field",
+              "name": "canvas"
+            },
+            {
+              "kind": "field",
+              "name": "ctx"
+            },
+            {
+              "kind": "field",
+              "name": "tickTimer",
+              "default": "new s"
+            },
+            {
+              "kind": "method",
+              "name": "#e",
+              "parameters": [
+                {
+                  "name": "e"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "#r",
+              "parameters": [
+                {
+                  "name": "e"
+                },
+                {
+                  "name": "t"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "#t"
+            },
+            {
+              "kind": "method",
+              "name": "#n"
+            },
+            {
+              "kind": "field",
+              "name": "textContent",
+              "type": {
+                "text": "string"
+              },
+              "default": "\"@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');\""
+            },
+            {
+              "kind": "field",
+              "name": "font",
+              "type": {
+                "text": "string"
+              },
+              "default": "\"14px VT323\""
+            },
+            {
+              "kind": "field",
+              "name": "imageSmoothingEnabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "!1"
+            },
+            {
+              "kind": "field",
+              "name": "adoptedStyleSheets",
+              "type": {
+                "text": "array"
+              },
+              "default": "[t]"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "width"
+            },
+            {
+              "name": "height"
+            }
+          ],
+          "superclass": {
+            "name": "HTMLElement"
+          },
+          "tagName": "game-of-life",
+          "customElement": true
+        },
+        {
+          "kind": "function",
+          "name": "c"
+        }
+      ],
+      "exports": [
+        {
+          "kind": "custom-element-definition",
+          "name": "game-of-life",
+          "declaration": {
+            "name": "c",
+            "module": "dist/index.js"
+          }
+        }
+      ]
+    }
+  ]
+}

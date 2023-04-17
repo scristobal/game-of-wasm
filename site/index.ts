@@ -1,5 +1,5 @@
-import { Cell, Universe } from 'glife-wasm';
-import { memory } from 'glife-wasm/glife_wasm_bg.wasm';
+import { Cell, Universe } from './bin/glife_wasm';
+import { memory } from './bin/glife_wasm_bg.wasm';
 
 class TickTimer {
     times: number[] = Array(10);
@@ -21,8 +21,8 @@ class TickTimer {
 }
 
 class GameOfLife extends HTMLElement {
-    width = 512;
-    height = 512;
+    width = window.innerWidth / 2;
+    height = window.innerHeight / 2;
 
     universe = Universe.new(this.width, this.height);
     memory = memory;
@@ -157,5 +157,3 @@ declare global {
 }
 
 customElements.define('game-of-life', GameOfLife);
-
-export { GameOfLife };

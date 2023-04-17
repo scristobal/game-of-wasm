@@ -2,68 +2,22 @@
 
 This repo is a playground for experimentation with the interplay between Rust, Web Assembly and Web Components.
 
-So far there is an implementation og Conway's Game of Life written in Web Assembly and compiled to Rust, wrapped in a web component and a small usage example.
+There is an implementation og Conway's Game of Life written in Rust and compiled to WASM, wrapped in a web component. The code is adapted from the Rust-WASM book, with a few tweaks/updates.
 
-The code is adapted from the Rust-WASM book (link below), with a few tweaks and updates.
+## 🪁 Try it
 
-Check the result here <https://samuelsh-glife-wasm.vercel.app/> or use it as
+The repo is deployed automagically to Vercel: <https://samuelsh-glife-wasm.vercel.app/>.
 
-```html
-<!DOCTYPE html>
-<html>
-    <head>
-        <script defer src="./index.js"></script>
-    </head>
+## 🏗️ Build it
 
-    <body>
-        <game-of-life width="512" height="512" />
-    </body>
-
-</html>
-```
-
-Check out the NPM module at <https://www.npmjs.com/package/glife-wasm>, a minimal example
-
-```typescript
-const { Universe } = await import('glife-wasm');
-const { memory } = await import('glife-wasm/glife_wasm_bg.wasm');
-
-const universe = Universe.new(512, 512);
-
-universe.tick();
-
-const cellsPtr = universe.cells();
-const cells = new Uint8Array(memory.buffer, cellsPtr, 512 * 512);
-```
-
-## 🏗️ Structure
+Clone the repo and make sure you have Rust and wasm-bindgen installed.
 
 The repo has two main components:
 
-- A Rust project a the `root/`
-- The web component and a sample webpage in `site/`
+- A Rust implementation of Conways' Game of Life `/`
+- A sample page and web component wrapper under `site/`
 
-You need to build the Rust project first and then bring it into the sample website, either locally or using NPM.
+You need to build the Rust project first and then bring it into the sample website.
 
-### 🍳 Run locally
-
-1. Compile to WASM and create a NPM package with `wasm-pack build --target bundler` or use `Makefile`, eg `make wasm`. Output will be in the `pkg/` folder
-2. Go to `/site` install deps with `npm i` and run a dev server with `npm run dev`. Under the hood, this will create a `npm link` to `../pkg`
-
-### 📦 Publish to NPM
-
-1. Update version number on `Cargo.toml`
-2. Compile to WASM and create a NPM package with `wasm-pack build --target bundler` or use `Makefile`, eg `make wasm`. Output will be in the `pkg/` folder
-3. Go to`site/` and execute `npm run build`. This will remove any existing `npm link`, install modules and build the app.
-4. Add `glife_wasm_bg.wasm.d.ts` to the `files` array in `pkg/package.json`. Opened an issue <https://github.com/rustwasm/wasm-pack/issues/1193> and a PR <https://github.com/rustwasm/wasm-pack/pull/1194>
-
-### 🕸️ Upload to the Web
-
-Nothing to do, Vercel deploys `main` branch automatically.
-
-## Update
-
-without `wasm-pack` in two steps:
-
-- compile to wasm `cargo build --target=wasm32-unknown-unknown --release`
-- create JS/TS `wasm-bindgen ./target/wasm32-unknown-unknown/release/glife_wasm.wasm --out-dir ./wasm-bindgen-out`
+- compile rust to wasm `cargo build --target=wasm32-unknown-unknown --release`
+- create js bundle `wasm-bindgen ./target/wasm32-unknown-unknown/release/glife_wasm.wasm --out-dir ./site/bin`
