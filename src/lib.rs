@@ -4,8 +4,7 @@
 extern crate console_error_panic_hook;
 mod utils;
 
-use rand;
-use utils::{log, Timer};
+use utils::log;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
