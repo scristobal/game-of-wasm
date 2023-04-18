@@ -38,7 +38,7 @@ class GameOfLife extends HTMLElement {
         this.canvas.height = this.height;
         this.canvas.width = this.width;
 
-        this.canvas.addEventListener('mousemove', this.#mouseMoveHandler.bind(this));
+        this.canvas.addEventListener('mousemove', this.mouseMoveHandler.bind(this));
 
         /**
          * this is a workaround to @import statements not allowed on CSSStyleSheet API:
@@ -65,8 +65,7 @@ class GameOfLife extends HTMLElement {
     }
 
     connectedCallback() {
-        this.#drawCells();
-        this.#renderLoop();
+        this.renderLoop();
     }
 
     static get observedAttributes() {
@@ -74,11 +73,11 @@ class GameOfLife extends HTMLElement {
     }
 
     attributeChangedCallback(property: 'width' | 'height', _oldValue: number, newValue: number) {
-        if (property === 'height') this.#rescale(newValue, this.width);
-        if (property === 'width') this.#rescale(this.height, newValue);
+        if (property === 'height') this.rescale(newValue, this.width);
+        if (property === 'width') this.rescale(this.height, newValue);
     }
 
-    #mouseMoveHandler(event: MouseEvent) {
+    private mouseMoveHandler(event: MouseEvent) {
         const canvas = this.shadowRoot!.querySelector('canvas')!;
         const boundingRect = canvas.getBoundingClientRect();
 
@@ -99,11 +98,9 @@ class GameOfLife extends HTMLElement {
         const isDead = cells[index] === Cell.Dead;
 
         cells[index] = isDead ? Cell.Alive : Cell.Dead;
-
-        this.#drawCells();
     }
 
-    #rescale(height: number, width: number) {
+    private rescale(height: number, width: number) {
         this.height = height;
         this.width = width;
 
@@ -115,7 +112,7 @@ class GameOfLife extends HTMLElement {
         this.universe = Universe.new(this.width, this.height);
     }
 
-    #drawCells() {
+    private drawCells() {
         const cellsPtr = this.universe.cells();
         const cells = new Uint8Array(this.memory.buffer, cellsPtr, this.width * this.height);
 
@@ -137,16 +134,16 @@ class GameOfLife extends HTMLElement {
         this.ctx.fillText(txt, this.width - metrics.width, this.height - metrics.actualBoundingBoxDescent);
     }
 
-    #renderLoop() {
+    private renderLoop() {
         const beforeTime = performance.now();
 
         this.universe.tick();
 
-        this.#drawCells();
+        this.drawCells();
 
         this.tickTimer.time = performance.now() - beforeTime;
 
-        requestAnimationFrame(this.#renderLoop.bind(this));
+        requestAnimationFrame(this.renderLoop.bind(this));
     }
 }
 
