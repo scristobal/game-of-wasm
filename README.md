@@ -17,7 +17,4 @@ The repo has two main components:
 - A Rust implementation of Conways' Game of Life `/`
 - A sample page and web component wrapper under `site/`
 
-You need to build the Rust project first and then bring it into the sample website.
-
-- compile rust to wasm `cargo build --target=wasm32-unknown-unknown --release`
-- create js bundle `wasm-bindgen ./target/wasm32-unknown-unknown/release/glife_wasm.wasm --out-dir ./site/bin`
+You need to build the Rust project first and then bring it into the sample site. To do so, simply run `just build`
