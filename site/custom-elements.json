@@ -13,38 +13,48 @@
           "members": [
             {
               "kind": "field",
-              "name": "width"
-            },
-            {
-              "kind": "field",
-              "name": "height"
-            },
-            {
-              "kind": "field",
-              "name": "universe"
+              "name": "universe",
+              "privacy": "private"
             },
             {
               "kind": "field",
               "name": "memory",
+              "privacy": "private",
               "default": "memory"
             },
             {
               "kind": "field",
-              "name": "canvas"
+              "name": "canvas",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "height",
+              "privacy": "private",
+              "default": "height"
+            },
+            {
+              "kind": "field",
+              "name": "width",
+              "privacy": "private",
+              "default": "width"
             },
             {
               "kind": "field",
               "name": "ctx",
+              "privacy": "private",
               "default": "this.canvas.getContext('2d')!"
             },
             {
               "kind": "field",
               "name": "tickTimer",
+              "privacy": "private",
               "default": "new TickTimer()"
             },
             {
               "kind": "method",
-              "name": "#mouseMoveHandler",
+              "name": "mouseMoveHandler",
+              "privacy": "private",
               "parameters": [
                 {
                   "name": "event",
@@ -56,7 +66,8 @@
             },
             {
               "kind": "method",
-              "name": "#rescale",
+              "name": "rescale",
+              "privacy": "private",
               "parameters": [
                 {
                   "name": "height",
@@ -74,11 +85,13 @@
             },
             {
               "kind": "method",
-              "name": "#drawCells"
+              "name": "drawCells",
+              "privacy": "private"
             },
             {
               "kind": "method",
-              "name": "#renderLoop"
+              "name": "renderLoop",
+              "privacy": "private"
             },
             {
               "kind": "field",
@@ -324,14 +337,6 @@
         },
         {
           "kind": "function",
-          "name": "__wbg_randomFillSync_065afffde01daa66"
-        },
-        {
-          "kind": "function",
-          "name": "__wbg_getRandomValues_b99eec4244a475bb"
-        },
-        {
-          "kind": "function",
           "name": "__wbg_process_0cc2ada8524d6f83",
           "parameters": [
             {
@@ -400,6 +405,14 @@
         {
           "kind": "function",
           "name": "__wbg_require_a746e79b322b9336"
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_getRandomValues_b99eec4244a475bb"
+        },
+        {
+          "kind": "function",
+          "name": "__wbg_randomFillSync_065afffde01daa66"
         },
         {
           "kind": "function",
@@ -614,22 +627,6 @@
         },
         {
           "kind": "js",
-          "name": "__wbg_randomFillSync_065afffde01daa66",
-          "declaration": {
-            "name": "__wbg_randomFillSync_065afffde01daa66",
-            "module": "bin/glife_wasm_bg.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "__wbg_getRandomValues_b99eec4244a475bb",
-          "declaration": {
-            "name": "__wbg_getRandomValues_b99eec4244a475bb",
-            "module": "bin/glife_wasm_bg.js"
-          }
-        },
-        {
-          "kind": "js",
           "name": "__wbg_process_0cc2ada8524d6f83",
           "declaration": {
             "name": "__wbg_process_0cc2ada8524d6f83",
@@ -697,6 +694,22 @@
           "name": "__wbg_require_a746e79b322b9336",
           "declaration": {
             "name": "__wbg_require_a746e79b322b9336",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_getRandomValues_b99eec4244a475bb",
+          "declaration": {
+            "name": "__wbg_getRandomValues_b99eec4244a475bb",
+            "module": "bin/glife_wasm_bg.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "__wbg_randomFillSync_065afffde01daa66",
+          "declaration": {
+            "name": "__wbg_randomFillSync_065afffde01daa66",
             "module": "bin/glife_wasm_bg.js"
           }
         },

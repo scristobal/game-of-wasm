@@ -1,28 +1,36 @@
 <!DOCTYPE html>
 <html lang="en-US" data-theme="light">
+    <head>
+        <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+        <title>Glife-wasm</title>
+        <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="./assets//favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="./assets//favicon-16x16.png" />
+        <link rel="manifest" href="./assets/site.webmanifest" />
+        <script defer src="./index.js"></script>
+        <style>
+            body {
+                margin: 0;
+            }
 
-<head>
-    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
-    <title>Glife-wasm</title>
-    <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="./assets//favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="./assets//favicon-16x16.png">
-    <link rel="manifest" href="./assets/site.webmanifest">
-    <script defer src="./index.js"></script>
-    <style>
-        body {
-            width: 100vw;
-            height: 100vh;
-            margin: 0;
-            display: grid;
-            align-items: center;
-            justify-content: center;
-        }
-    </style>
-</head>
+            main {
+                width: 100vw;
+                height: 100dvh;
+                display: grid;
+                align-items: center;
+                justify-content: center;
+            }
 
-<body>
-    <game-of-life />
-</body>
+            game-of-life {
+                height: 512px;
+                width: 512px;
+            }
+        </style>
+    </head>
 
+    <body>
+        <main>
+            <game-of-life height="256" width="256" />
+        </main>
+    </body>
 </html>

@@ -21,41 +21,41 @@ class TickTimer {
 }
 
 class GameOfLife extends HTMLElement {
-    width = window.innerWidth / 2;
-    height = window.innerHeight / 2;
+    private universe;
+    private memory;
+    private canvas;
+    private height;
+    private width;
+    private ctx;
+    private tickTimer;
 
-    universe = Universe.new(this.width, this.height);
-    memory = memory;
-
-    canvas = document.createElement('canvas');
-    ctx = this.canvas.getContext('2d')!;
-
-    tickTimer = new TickTimer();
-
-    constructor() {
+    constructor(height: number, width: number) {
         super();
 
-        this.canvas.height = this.height;
-        this.canvas.width = this.width;
+        this.width = width;
+        this.height = height;
+
+        this.universe = Universe.new(this.width, this.height);
+        this.memory = memory;
+
+        this.canvas = document.createElement('canvas');
+        this.ctx = this.canvas.getContext('2d')!;
+
+        this.tickTimer = new TickTimer();
+
+        this.canvas.height = height;
+        this.canvas.width = width;
 
         this.canvas.addEventListener('mousemove', this.mouseMoveHandler.bind(this));
 
-        /**
-         * this is a workaround to @import statements not allowed on CSSStyleSheet API:
-         *  https://web.dev/constructable-stylesheets/
-         *  https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/insertRule
-         */
-        const fontLoader = document.createElement('style');
-        fontLoader.textContent = `@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');`;
-        document.head.appendChild(fontLoader);
-
-        this.ctx.font = '14px VT323';
         this.ctx.imageSmoothingEnabled = false;
 
         const style = new CSSStyleSheet();
         style.insertRule(`canvas {
                 image-rendering: pixelated;
                 image-rendering: crisp-edges;
+                height: 100%;
+                width: 100%;
             }`);
 
         const shadowRoot = this.attachShadow({ mode: 'open' });
@@ -65,6 +65,15 @@ class GameOfLife extends HTMLElement {
     }
 
     connectedCallback() {
+        setInterval(
+            () =>
+                console.log(
+                    `Average universe tick time: ${this.tickTimer.time}ms or ${
+                        1000 / this.tickTimer.time
+                    }fps`
+                ),
+            1000
+        );
         this.renderLoop();
     }
 
@@ -128,10 +137,6 @@ class GameOfLife extends HTMLElement {
         }
 
         this.ctx.putImageData(img, 0, 0);
-
-        const txt = `${this.tickTimer.time.toFixed(0)}ms`;
-        const metrics = this.ctx.measureText(txt);
-        this.ctx.fillText(txt, this.width - metrics.width, this.height - metrics.actualBoundingBoxDescent);
     }
 
     private renderLoop() {
