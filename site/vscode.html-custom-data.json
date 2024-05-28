@@ -9,15 +9,6 @@
         { "name": "height", "values": [] }
       ],
       "references": []
-    },
-    {
-      "name": "game-of-life",
-      "description": "\n\n\n---\n\n\n",
-      "attributes": [
-        { "name": "width", "values": [] },
-        { "name": "height", "values": [] }
-      ],
-      "references": []
     }
   ]
 }

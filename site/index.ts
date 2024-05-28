@@ -1,25 +1,6 @@
 import { Cell, Universe } from './bin/glife_wasm';
 import { memory } from './bin/glife_wasm_bg.wasm';
 
-class TickTimer {
-    times: number[] = Array(10);
-
-    set time(delta: number) {
-        this.times.shift();
-        this.times.push(delta);
-    }
-
-    get time() {
-        let sum = 0;
-        for (let i = 0; i < this.times.length; i++) {
-            sum += this.times[i]!;
-        }
-        let mean = sum / this.times.length;
-
-        return Math.round(mean);
-    }
-}
-
 class GameOfLife extends HTMLElement {
     private universe;
     private memory;
@@ -27,7 +8,6 @@ class GameOfLife extends HTMLElement {
     private height;
     private width;
     private ctx;
-    private tickTimer;
 
     constructor(height: number, width: number) {
         super();
@@ -40,8 +20,6 @@ class GameOfLife extends HTMLElement {
 
         this.canvas = document.createElement('canvas');
         this.ctx = this.canvas.getContext('2d')!;
-
-        this.tickTimer = new TickTimer();
 
         this.canvas.height = height;
         this.canvas.width = width;
@@ -65,15 +43,6 @@ class GameOfLife extends HTMLElement {
     }
 
     connectedCallback() {
-        setInterval(
-            () =>
-                console.log(
-                    `Average universe tick time: ${this.tickTimer.time}ms or ${
-                        1000 / this.tickTimer.time
-                    }fps`
-                ),
-            1000
-        );
         this.renderLoop();
     }
 
@@ -140,13 +109,9 @@ class GameOfLife extends HTMLElement {
     }
 
     private renderLoop() {
-        const beforeTime = performance.now();
-
         this.universe.tick();
 
         this.drawCells();
-
-        this.tickTimer.time = performance.now() - beforeTime;
 
         requestAnimationFrame(this.renderLoop.bind(this));
     }
