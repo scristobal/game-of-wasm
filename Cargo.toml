@@ -12,8 +12,8 @@ crate-type = ["cdylib", "rlib"]
 default = ["console_error_panic_hook"]
 
 [dependencies]
-wasm-bindgen = "0.2.89"
-web-sys = { version = "0.3.66", features = [
+wasm-bindgen = "0.2.92"
+web-sys = { version = "0.3.69", features = [
     "console",
     'CanvasRenderingContext2d',
     'Document',
@@ -21,10 +21,10 @@ web-sys = { version = "0.3.66", features = [
     'HtmlCanvasElement',
     'Window',
 ] }
-js-sys = "0.3.66"
+js-sys = "0.3.69"
 console_error_panic_hook = { version = "0.1.7", optional = true }
-getrandom = { version = "0.2.11", features = ["js"] }
+getrandom = { version = "0.2.15", features = ["js"] }
 rand = { version = "0.8.5" }
 
 [dev-dependencies]
-wasm-bindgen-test = "0.3.39"
+wasm-bindgen-test = "0.3.42"
