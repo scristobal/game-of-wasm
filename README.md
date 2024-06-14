@@ -6,7 +6,7 @@ There is an implementation og Conway's Game of Life written in Rust and compiled
 
 ## 🪁 Try it
 
-The repo is deployed automagically to Vercel: <https://samuelsh-glife-wasm.vercel.app/>.
+The repo is deployed here: <https://game-of-wasm.messy.page/>.
 
 ## 🏗️ Build it
 
