@@ -1,5 +1,10 @@
-import { generateCustomData } from 'cem-plugin-vs-code-custom-data-generator';
+import { customElementVsCodePlugin } from "custom-element-vs-code-integration";
+
+
+const options = {};
 
 export default {
-    plugins: [generateCustomData()],
+  plugins: [
+    customElementVsCodePlugin(options)
+  ],
 };

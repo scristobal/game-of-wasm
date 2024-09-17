@@ -18,3 +18,5 @@ The repo has two main components:
 - A sample page and web component wrapper under `site/`
 
 You need to build the Rust project first and then bring it into the sample site. To do so, simply run `just build`
+
+You will need the `wasm32-unknown-unknown` target and `wasm-bindgen-cli` installed.
